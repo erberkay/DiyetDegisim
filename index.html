@@ -69,6 +69,8 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:
 .tot b{font-family:var(--f-display);font-size:22px;line-height:1}
 .tot span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:6px}
 .tot span::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--c)}
+.tot .lim{font-size:13px;font-weight:500;color:var(--muted)}
+.limnote{margin:8px 2px 0}
 .alert{margin-top:10px;background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:500}
 
 /* meals */
@@ -436,6 +438,26 @@ function totals(p){
   }));
   return {t, gi};
 }
+/* ---------- limitler ----------
+   Berkay Er'in listesindeki günlük değişim sayıları üst sınırdır:
+   bir öğüne kalem eklenerek ya da değiştirme ekranında fazla seçilerek
+   aşılamaz. * işaretli meyveler her profilde günde en fazla 1 porsiyon. */
+const BERKAY_LIMITS = {et:9, sut:2, sebze:2, meyve:2, ekmek:12, yag:1};
+const GI_MAX = 1;
+const limitsOf = id => id==="p1" ? BERKAY_LIMITS : null;
+function overLimits(p, id){
+  const L = limitsOf(id); if(!L) return [];
+  const {t} = totals(p);
+  return GKEYS.filter(k=>t[k] > L[k] + 1e-9).map(k=>`${GROUPS[k].name} ${fmtNum(t[k])}/${fmtNum(L[k])}`);
+}
+function giOutside(iid){
+  let gi = 0;
+  P().meals.forEach(m=>m.items.forEach(it=>{
+    if(it.kind!=="ex" || it.id===iid) return;
+    portions(it).forEach(x=>{ const f=FOOD[it.group+":"+x.f]; if(f&&f.gi) gi+=x.u; });
+  }));
+  return gi;
+}
 function toast(msg){
   const el = document.createElement("div"); el.className="toast"; el.textContent=msg;
   document.body.appendChild(el); setTimeout(()=>el.remove(),1800);
@@ -470,12 +492,16 @@ function viewMenu(){
       <button class="btn" data-act="copy-berkay">Berkay Er'in listesini kopyala</button></div></div>`;
   }
   const {t, gi} = totals(p);
+  const L = limitsOf(S.active);
   const log = p.log[todayKey()] || {};
   const d = new Date().toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long"});
   const who = [p.fullName, p.source].filter(Boolean).map(esc).join(" · ");
   let h = (who?`<p class="owner">${who}</p>`:"") + `<div class="day"><h2>Günlük değişim</h2><span class="meta">${esc(d)}</span></div>
-    <div class="totals">${GKEYS.map(k=>`<div class="tot" style="--c:${gcolor(k)}"><b class="tnum">${fmtNum(t[k])}</b><span>${GROUPS[k].name}</span></div>`).join("")}</div>`;
-  if(gi>1) h += `<div class="alert">Kan şekerini hızlı yükselten (*) meyveden bugün ${fmtNum(gi)} porsiyon seçili. Listeye göre günde en fazla 1 porsiyon.</div>`;
+    <div class="totals">${GKEYS.map(k=>`<div class="tot" style="--c:${gcolor(k)}"><b class="tnum">${fmtNum(t[k])}${L?`<small class="lim"> / ${fmtNum(L[k])}</small>`:""}</b><span>${GROUPS[k].name}</span></div>`).join("")}</div>`;
+  if(L) h += `<p class="hint limnote">Sayılar diyetisyenin verdiği günlük limittir; değişim sadece bu sınırlar içinde yapılır.</p>`;
+  const over = overLimits(p, S.active);
+  if(over.length) h += `<div class="alert">Liste günlük limiti aşıyor: ${esc(over.join(", "))}. Profili düzenle'den fazla kalemi sil ya da diyetisyen listesine sıfırla.</div>`;
+  if(gi>GI_MAX) h += `<div class="alert">Kan şekerini hızlı yükselten (*) meyveden bugün ${fmtNum(gi)} porsiyon seçili. Listeye göre günde en fazla 1 porsiyon.</div>`;
   h += `<div class="meals">`;
   p.meals.forEach(m=>{
     h += `<section class="meal"><div class="meal-h"><h3>${esc(m.name)}</h3><span class="time tnum">${esc(m.time||"")}</span></div><ul class="items">`;
@@ -522,6 +548,11 @@ function viewEdit(){
     <div class="field"><label for="pname">Profil adı</label><input type="text" id="pname" value="${esc(p.name)}"></div>
     <div class="field"><label for="pfull">Listedeki hasta adı</label><input type="text" id="pfull" value="${esc(p.fullName||"")}"></div>
     <div class="field"><label for="psrc">Listeyi veren kurum</label><input type="text" id="psrc" value="${esc(p.source||"")}"></div>`;
+  const L = limitsOf(S.active);
+  if(L){ const {t} = totals(p);
+    h += `<div class="card"><h2>Günlük değişim limiti</h2>
+      <p class="hint">Diyetisyen listesindeki sayılar üst sınırdır. Kalem ekleyerek aşılamaz; yeni kalem eklemek için önce aynı gruptan bir kalemi sil.</p>
+      <div class="totals">${GKEYS.map(k=>`<div class="tot" style="--c:${gcolor(k)}"><b class="tnum">${fmtNum(t[k])}<small class="lim"> / ${fmtNum(L[k])}</small></b><span>${GROUPS[k].name}</span></div>`).join("")}</div></div>`; }
   p.meals.forEach((m,mi)=>{
     h += `<section class="meal"><div class="emeal-h">
       <input type="text" id="mn-${m.id}" data-mname="${m.id}" value="${esc(m.name)}" aria-label="Öğün adı">
@@ -562,6 +593,16 @@ function openSwap(iid){
   SW = {iid, counts, step: r.it.units % 1 ? .5 : 1};
   renderSheet();
 }
+function giRoom(it){
+  // bu kalemde * meyveye ayrılabilecek en fazla porsiyon
+  const inSheet = Object.entries(SW.counts).reduce((a,[fid,u])=>a+(FOOD[it.group+":"+fid]?.gi?u:0),0);
+  return Math.max(0, GI_MAX - giOutside(it.id) - inSheet);
+}
+function canInc(it, f, used){
+  if(used + SW.step > it.units + 1e-9) return false;
+  if(f.gi && giRoom(it) < SW.step - 1e-9) return false;
+  return true;
+}
 function renderSheet(){
   const root = $("#sheet-root");
   if(!SW){ root.innerHTML=""; return; }
@@ -576,13 +617,14 @@ function renderSheet(){
       <h3>${fmtNum(it.units)} ${G.long}</h3>
       <p>Bir besine dokun: hepsi onunla değişir. Ya da +/− ile birkaç besine böl.${it.orig?` Listede: ${esc(it.orig)}.`:""}</p>
       <div class="meter" aria-hidden="true">${meter}</div>
-      <p class="tnum" role="status">${status}</p></div>
+      <p class="tnum" role="status">${status}</p>
+      <p class="hint">Limit: bu öğünde en fazla ${fmtNum(it.units)} değişim.${G.foods.some(f=>f.gi)?" * işaretli meyveden günde en fazla 1 porsiyon.":""}</p></div>
     <div class="sheet-b">${G.foods.map(f=>{
       const c = SW.counts[f.id]||0;
       return `<div class="opt ${c?"sel":""}"><div><button class="nm" data-all="${f.id}">${esc(f.name)}${f.gi?' <span style="color:var(--g-meyve)">*</span>':""}</button>
         <div class="sub tnum">1 değişim: ${esc(amount(f,1))}</div>
         ${c?`<div class="cur tnum">Seçili: ${esc(amount(f,c))}</div>`:""}</div>
-        <div class="step"><button data-dec="${f.id}" aria-label="${esc(f.name)} azalt" ${c?"":"disabled"}>−</button><output class="tnum">${fmtNum(c)}</output><button data-inc="${f.id}" aria-label="${esc(f.name)} artır">+</button></div></div>`;
+        <div class="step"><button data-dec="${f.id}" aria-label="${esc(f.name)} azalt" ${c?"":"disabled"}>−</button><output class="tnum">${fmtNum(c)}</output><button data-inc="${f.id}" aria-label="${esc(f.name)} artır" ${canInc(it,f,used)?"":"disabled"}>+</button></div></div>`;
     }).join("")}</div>
     <div class="sheet-f"><button class="btn ghost" data-swapreset="1">Listedeki haline dön</button>
       <div class="right"><button class="btn" data-close="1">Vazgeç</button><button class="btn primary" data-swapsave="1" ${Math.abs(left)<1e-9?"":"disabled"}>Kaydet</button></div></div>
@@ -608,8 +650,19 @@ document.addEventListener("click", e=>{
   if(d.gtab){ GTAB=d.gtab; render(); return; }
   if(d.check){ const k=todayKey(); const p=P(); p.log={[k]:p.log[k]||{}}; p.log[k][d.check]=!p.log[k][d.check]; if(!p.log[k][d.check]) delete p.log[k][d.check]; save(); render(); return; }
   if(d.swap){ openSwap(d.swap); return; }
-  if(d.all){ const {it}=findItem(SW.iid); SW.counts={[d.all]:it.units}; renderSheet(); return; }
-  if(d.inc){ SW.counts[d.inc]=(SW.counts[d.inc]||0)+SW.step; renderSheet(); return; }
+  if(d.all){
+    const {it}=findItem(SW.iid); const f=FOOD[it.group+":"+d.all];
+    SW.counts={};
+    const u = f.gi ? Math.min(it.units, Math.floor(giRoom(it)/SW.step+1e-9)*SW.step) : it.units;
+    if(u>0) SW.counts[d.all]=u;
+    if(u<it.units) toast(u>0 ? `* meyveden günde en fazla ${GI_MAX} porsiyon. Kalanı başka meyveden seç.` : `* meyve hakkın bugün doldu. Başka meyve seç.`);
+    renderSheet(); return;
+  }
+  if(d.inc){
+    const {it}=findItem(SW.iid); const used=Object.values(SW.counts).reduce((a,b)=>a+b,0);
+    if(!canInc(it, FOOD[it.group+":"+d.inc], used)) return;
+    SW.counts[d.inc]=(SW.counts[d.inc]||0)+SW.step; renderSheet(); return;
+  }
   if(d.dec){ SW.counts[d.dec]=Math.max(0,(SW.counts[d.dec]||0)-SW.step); renderSheet(); return; }
   if(d.swapreset){ const {it}=findItem(SW.iid); SW.counts={}; it.def.forEach(x=>SW.counts[x.f]=x.u); renderSheet(); return; }
   if(d.swapsave){ saveSwap(); return; }
@@ -619,7 +672,12 @@ document.addEventListener("click", e=>{
     const mid=d.additem, g=$("#ag-"+mid).value, u=parseFloat($("#au-"+mid).value), fv=$("#af-"+mid).value.trim();
     const m=P().meals.find(x=>x.id===mid);
     if(g==="free"){ if(!fv){ toast("Önce metni yaz"); return; } m.items.push(fr(fv)); }
-    else m.items.push(ex(g,u,fv));
+    else {
+      const L=limitsOf(S.active), {t,gi}=totals(P());
+      if(L && t[g]+u > L[g]+1e-9){ const room=L[g]-t[g]; toast(room>0 ? `Günlük ${GROUPS[g].name.toLocaleLowerCase("tr")} limiti ${fmtNum(L[g])}. En fazla ${fmtNum(room)} değişim ekleyebilirsin.` : `Günlük ${GROUPS[g].name.toLocaleLowerCase("tr")} limiti (${fmtNum(L[g])}) dolu. Önce başka bir kalemi sil.`); return; }
+      if(FOOD[g+":"+fv]?.gi && gi+u > GI_MAX+1e-9){ toast(`* meyveden günde en fazla ${GI_MAX} porsiyon.`); return; }
+      m.items.push(ex(g,u,fv));
+    }
     save(); render(); toast("Eklendi"); return;
   }
   if(d.act==="addmeal"){ P().meals.push({id:nid("m"),name:"Yeni öğün",time:"",items:[]}); save(); render(); return; }
