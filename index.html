@@ -45,10 +45,10 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:
 .tnum{font-variant-numeric:tabular-nums}
 
 /* header */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;display:grid;gap:12px;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.brand h1{font-size:24px;font-weight:700}
-.brand small{color:var(--muted);font-size:13px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.brand h1{font-size:24px;font-weight:700;flex:none}
+.brand small{color:var(--muted);font-size:13px;min-width:0;text-align:right;line-height:1.3;overflow-wrap:anywhere}
 .profiles{display:flex;gap:6px;flex-wrap:wrap}
 .pbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-weight:500;display:flex;align-items:center;gap:8px}
 .pbtn .dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:600;background:var(--surface-2);color:var(--muted)}
@@ -57,6 +57,7 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:
 .tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
 .tab{border:0;background:none;padding:6px 12px;border-radius:8px;color:var(--muted);font-weight:600;white-space:nowrap}
 .tab[aria-selected="true"]{background:var(--accent-soft);color:var(--accent)}
+.tab .sm{display:none}
 
 .owner{margin:16px 0 0;color:var(--muted);font-size:13px;font-weight:500}
 /* totals */
@@ -74,9 +75,9 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:
 .mroom{margin:0;padding:8px 14px 0;border-top:1px solid var(--line)}
 .improw{display:grid;gap:4px;padding:10px 14px;border-top:1px solid var(--line)}
 .improw.check{background:var(--warn-soft)}
-.impc{display:grid;grid-template-columns:110px 80px 1fr auto;gap:8px;align-items:center}
+.impc{display:grid;grid-template-columns:110px 80px 1fr auto;gap:8px;align-items:stretch}
 .impc input[type=text]{grid-column:span 2}
-@media (max-width:560px){.impc{grid-template-columns:1fr 84px auto}.impc select[data-impf],.impc input[type=text]{grid-column:1/-1;order:3}}
+@media (max-width:560px){.impc{grid-template-columns:1fr 84px auto}.impc select[data-impf],.impc input[type=text]{grid-column:1/-1;order:3}.impc.free select{grid-column:1/3}}
 details.card summary{cursor:pointer;font-weight:600}
 progress{accent-color:var(--accent);height:10px}
 .alert{margin-top:10px;background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:500}
@@ -89,9 +90,10 @@ progress{accent-color:var(--accent);height:10px}
 .meal-h .time{color:var(--muted);font-size:13px}
 .items{list-style:none;margin:0;padding:0}
 .item{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
-.check{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line);background:var(--surface-2);display:grid;place-items:center;padding:0}
-.check[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.check svg{width:14px;height:14px}
+button.check{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line);background:var(--surface-2);display:grid;place-items:center;padding:0;position:relative}
+button.check::after{content:"";position:absolute;inset:-9px}
+button.check[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button.check svg{width:14px;height:14px}
 .item.done .what{opacity:.5;text-decoration:line-through}
 .what{display:grid;gap:3px;min-width:0}
 .food{font-weight:600}
@@ -112,7 +114,7 @@ progress{accent-color:var(--accent);height:10px}
 
 /* sheet */
 .scrim{position:fixed;inset:0;background:rgba(10,20,15,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
-.sheet{background:var(--surface);width:100%;max-width:640px;max-height:88vh;border-radius:18px 18px 0 0;box-shadow:var(--shadow);display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet{background:var(--surface);width:100%;max-width:640px;max-height:88vh;max-height:88dvh;border-radius:18px 18px 0 0;box-shadow:var(--shadow);display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (min-width:700px){.scrim{align-items:center}.sheet{border-radius:18px}}
 .sheet-h{padding:16px 16px 10px;display:grid;gap:6px;border-bottom:1px solid var(--line)}
 .sheet-h h3{font-size:20px}
@@ -150,6 +152,7 @@ th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);verti
 th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
 tr:last-child td{border-bottom:0}
 td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (max-width:560px){th,td{padding:8px 10px}td.num{white-space:normal}th:first-child{width:38%}}
 .tnote{font-size:13px;color:var(--muted);margin:10px 2px 0}
 
 /* rules tab */
@@ -174,8 +177,10 @@ textarea{min-height:120px;font-size:12px;font-family:ui-monospace,Menlo,monospac
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-weight:600;font-size:13px;z-index:30}
 .sync{font-size:12px;color:var(--muted)}
-.account{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.account{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .account .who{display:flex;align-items:center;gap:8px;font-weight:500;min-width:0}
+.account .btn{flex:none}
+.whot{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .account .who .dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:600;background:var(--accent);color:var(--accent-ink);flex:none}
 .account .mail{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
 .auth{max-width:420px;margin:24px auto 0}
@@ -188,6 +193,20 @@ div.choice{gap:8px}
 div.choice .field{margin-top:4px}
 div.choice .btn{justify-self:start}
 @media (prefers-reduced-motion:no-preference){.sheet.enter{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
+/* telefon: iOS 16px altındaki yazı kutusuna dokununca sayfayı yakınlaştırır */
+@media (pointer:coarse), (max-width:760px){input,select,textarea{font-size:16px}}
+@media (max-width:560px), (max-height:500px){
+  .top{top:calc(env(safe-area-inset-top,0px) - var(--top-hide,0px))}  /* kaydırınca başlık ve hesap satırı çekilir, sekmeler kalır */
+  .top:has(.account :focus-visible){top:env(safe-area-inset-top,0px)}  /* klavyeyle "Çıkış yap"a gelinince görünsün */
+}
+@media (max-width:480px){
+  .brand h1{font-size:21px}
+  .whot{display:grid;line-height:1.3}
+  .whot>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tab{flex:1 1 auto;padding:6px 8px}
+  .tab .lg{display:none}
+  .tab .sm{display:inline}
+}
 </style>
 </head>
 <body>
@@ -201,9 +220,9 @@ div.choice .btn{justify-self:start}
     <div class="account" id="account"></div>
     <nav class="tabs" role="tablist" id="tabs">
       <button class="tab" role="tab" data-tab="menu">Menü</button>
-      <button class="tab" role="tab" data-tab="tables">Değişim tabloları</button>
+      <button class="tab" role="tab" data-tab="tables"><span class="lg">Değişim tabloları</span><span class="sm">Tablolar</span></button>
       <button class="tab" role="tab" data-tab="rules">Kurallar</button>
-      <button class="tab" role="tab" data-tab="edit">Profili düzenle</button>
+      <button class="tab" role="tab" data-tab="edit"><span class="lg">Profili düzenle</span><span class="sm">Profil</span></button>
     </nav>
   </header>
   <main id="main"></main>
@@ -220,8 +239,8 @@ div.choice .btn{justify-self:start}
    Diyet listesi yemek adıyla değil "değişim" (porsiyon eşdeğeri)
    sayısıyla kurulur. Aynı gruptaki her besinin 1 değişimi aynı
    enerji/makro değerini taşır; bu yüzden bir öğündeki 3 ekmek
-   değişimi, 3 dilim ekmek yerine 6 yk pilav ya da 1 dilim ekmek +
-   4 yk pilav olarak yenebilir. Gruplar arası değişim yapılmaz.
+   değişimi, 3 dilim ekmek yerine 6 yemek kaşığı pilav ya da 1 dilim ekmek +
+   4 yemek kaşığı pilav olarak yenebilir. Gruplar arası değişim yapılmaz.
    Miktarlar diyetisyen listesindeki tablolardan alınmıştır.
    ============================================================ */
 const GROUPS = {
@@ -370,7 +389,7 @@ function berkayPlan(){
       ex("sebze",2,"sebzeyemegi","6-8 yemek kaşığı sebze yemeği"),
       fr("Salata (az yağlı)"),
       ex("ekmek",1,"tam","1 ince dilim tam buğday / çavdar ekmek"),
-      ex("sut",1,"yogurt","4 yk yoğurt veya 2 su bardağı ayran")
+      ex("sut",1,"yogurt","4 yemek kaşığı yoğurt veya 2 su bardağı ayran")
     ]},
     {id:nid("m"),key:"aksam",name:"Akşam",time:"17.00 – 17.30",items:[
       ex("ekmek",4,"pilav","8 yemek kaşığı pilav veya makarna"),
@@ -380,7 +399,7 @@ function berkayPlan(){
     ]},
     {id:nid("m"),key:"gece",name:"Gece · spor sonrası",time:"21.00 – 21.30",items:[
       ex("meyve",2,"elma","2 porsiyon meyve (Tablo 4)"),
-      ex("sut",1,"yogurt","4 yk yoğurt veya 1 su bardağı süt")
+      ex("sut",1,"yogurt","4 yemek kaşığı yoğurt veya 1 su bardağı süt")
     ]}
   ];
 }
@@ -476,8 +495,12 @@ function migrateProfile(p){
   }
 }
 
-let saveTimer = null, pending = null;
+let saveTimer = null, pending = null, SAVE_FAILED = false;
 function setSync(t){ document.getElementById("sync").textContent = t; }
+// telefonda kaydırınca yalnız sekmeler üstte kalsın: başlığın sekmelerden önceki kısmı kadar yukarı çekilir
+(function(){ const top = document.querySelector(".top"), tabs = document.getElementById("tabs");
+  const fit = () => document.documentElement.style.setProperty("--top-hide", Math.max(0, Math.round(tabs.getBoundingClientRect().top - top.getBoundingClientRect().top) - 6) + "px");
+  fit(); if(window.ResizeObserver) new ResizeObserver(fit).observe(top); else addEventListener("resize", fit); })();
 function save(){
   if(!ME || !USER) return;
   ME.updated = Date.now();
@@ -487,8 +510,11 @@ function save(){
   clearTimeout(saveTimer);
   // çevrimdışıyken set() hiç bitmeyebilir; 6 sn içinde onay gelmezse kaydedilemedi say
   pending = () => Promise.race([fsdb.collection("users").doc(u.uid).set({json, updated}), new Promise((_,j)=>setTimeout(()=>j(new Error("zaman aşımı")), 6000))])
-    .then(()=>{ if(USER===u) setSync("Hesabına kaydedildi"); return true; })
-    .catch(()=>{ if(USER===u) setSync("Kaydedilemedi, bu cihazda duruyor"); return false; });
+    .then(()=>{ SAVE_FAILED = false; if(USER===u) setSync("Hesabına kaydedildi"); return true; })
+    .catch(()=>{ if(USER===u){ setSync("Kaydedilemedi, bu cihazda duruyor");
+      // telefonda kaydırınca durum satırı görünmez; ilk hatada ayrıca bildir (çıkışta kendi uyarısı var)
+      if(!SAVE_FAILED && !SIGNING_OUT) toast("Kaydedilemedi: değişiklikler bu cihazda duruyor."); }
+      SAVE_FAILED = true; return false; });
   saveTimer = setTimeout(()=>{ const f=pending; pending=null; f(); }, 600);
 }
 function flushSave(){ clearTimeout(saveTimer); const f=pending; pending=null; return f ? f() : Promise.resolve(true); }
@@ -523,7 +549,7 @@ async function loadMe(u){
 let SIGNING_OUT = false;
 if(auth) auth.onAuthStateChanged(u=>{
   AUTH_READY = true; USER = u; ME = null; SW = null; IMP = null; renderSheet(); confirmKey = null;
-  LOADING = false; LOAD_ERR = false; SIGNING_OUT = false; IS_BERKAY = false;
+  LOADING = false; LOAD_ERR = false; SIGNING_OUT = false; IS_BERKAY = false; SAVE_FAILED = false;
   if(u) loadMe(u); else { AUTH_MODE = "login"; AUTH_EMAIL = ""; setSync(""); render(); }
 });
 
@@ -550,6 +576,8 @@ function amount(f, units){
   else if(f.ml) extra = " · " + fmtDec(f.ml*units) + " ml";
   return q + " " + f.u + extra;
 }
+// tablo hücresi: dar ekranda "30" ile "g" ayrı satıra düşmesin (yalnız boşluklar bölünmez olur, metin aynı)
+function tblAmt(f, units){ return esc(amount(f, units)).replace(/([\d½¼¾⅓⅔]) (?=\S)/g, "$1\u00a0").replace(/ · /g, "\u00a0· "); }
 function portions(it){ return it.sel || it.def; }
 function isSwapped(it){ return !!it.sel; }
 function gcolor(k){ return "var("+GROUPS[k].color+")"; }
@@ -623,7 +651,7 @@ function onboard(choice, nm){
 function initials(name){ return String(name||"").trim().split(/\s+/).map(w=>w[0]||"").join("").slice(0,2).toLocaleUpperCase("tr") || "?"; }
 function render(){
   const acc = $("#account");
-  if(USER) acc.innerHTML = `<span class="who"><span class="dot">${esc(initials(ME?ME.name:USER.email))}</span><span>${ME?esc(ME.name):""} <span class="mail">${esc(USER.email||"")}</span></span></span>
+  if(USER) acc.innerHTML = `<span class="who"><span class="dot">${esc(initials(ME?ME.name:USER.email))}</span><span class="whot"><span>${ME?esc(ME.name):""}</span> <span class="mail">${esc(USER.email||"")}</span></span></span>
     <button class="btn ghost" data-act="signout">Çıkış yap</button>`;
   else acc.innerHTML = AUTH_READY||!auth ? `<span class="mail">Giriş yapılmadı. Tabloları ve kuralları giriş yapmadan da görebilirsin.</span>` : "";
   document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===TAB));
@@ -660,7 +688,7 @@ function viewAuth(){
 function viewOnboard(){
   const legacy = legacyProfiles();
   return `<div class="card auth"><h2>Listeni seç</h2>
-    <p class="hint">Bu hesap için bir başlangıç seç. Sonradan “Profili düzenle”den değiştirebilirsin.</p>
+    <p class="hint">Bu hesap için bir başlangıç seç. Sonradan “Profil” sekmesinden değiştirebilirsin.</p>
     <div class="choices">
       ${IS_BERKAY?`<button class="choice" data-onboard="berkay"><b>Berkay Er'in diyetisyen listesi</b><span>Aydın Kuşadası İlçe Sağlık Müdürlüğü listesi. Değişim limitleri kilitli.</span></button>`:
       `<button class="choice" data-imp="start"><b>Diyetisyen listemi fotoğraftan ekle</b><span>Listenin fotoğrafını çek; öğünler ve değişimler otomatik çıkarılır, kaydetmeden önce kontrol edersin.</span></button>`}
@@ -699,7 +727,7 @@ function viewMenu(){
     <div class="totals">${GKEYS.map(k=>`<div class="tot" style="--c:${gcolor(k)}"><b class="tnum">${fmtNum(t[k])}${L?`<small class="lim"> / ${fmtNum(L[k])}</small>`:""}</b><span>${GROUPS[k].name}</span></div>`).join("")}</div>`;
   if(L) h += `<p class="hint limnote">Sayılar diyetisyenin verdiği limittir. Değişim sadece aynı öğün ve aynı grup içinde, bu sınırlarla yapılır.</p>`;
   const over = overLimits(p);
-  if(over.length) h += `<div class="alert">Liste diyetisyen limitini aşıyor: ${esc(over.join(", "))}. Profili düzenle'den fazla kalemi sil ya da diyetisyen listesine sıfırla.</div>`;
+  if(over.length) h += `<div class="alert">Liste diyetisyen limitini aşıyor: ${esc(over.join(", "))}. “Profil” sekmesinden fazla kalemi sil ya da diyetisyen listesine sıfırla.</div>`;
   if(gi>GI_MAX) h += `<div class="alert">Kan şekerini hızlı yükselten (*) meyveden bugün ${fmtNum(gi)} porsiyon seçili. Listeye göre günde en fazla 1 porsiyon.</div>`;
   h += `<div class="meals">`;
   p.meals.forEach(m=>{
@@ -725,11 +753,11 @@ function viewMenu(){
 function viewTables(){
   const G = GROUPS[GTAB];
   return `<div class="explain"><h2>Değişim nasıl çalışır?</h2>
-    <p>Listen yemek adıyla değil, her besin grubundan kaç <b>değişim</b> (porsiyon eşdeğeri) yiyeceğinle yazılmış. Aynı gruptaki besinlerin 1 değişimi aynı değerdedir. Örneğin 1 ince dilim ekmek = 2 yemek kaşığı pilav = 1 küçük haşlanmış patates. Öğündeki 3 ekmek değişimini 6 yk pilav ya da 1 dilim ekmek + 4 yk pilav olarak yiyebilirsin. Değişim sadece aynı grup içinde yapılır; ekmek yerine et yenmez.</p></div>
+    <p>Listen yemek adıyla değil, her besin grubundan kaç <b>değişim</b> (porsiyon eşdeğeri) yiyeceğinle yazılmış. Aynı gruptaki besinlerin 1 değişimi aynı değerdedir. Örneğin 1 ince dilim ekmek = 2 yemek kaşığı pilav = 1 küçük haşlanmış patates. Öğündeki 3 ekmek değişimini 6 yemek kaşığı pilav ya da 1 dilim ekmek + 4 yemek kaşığı pilav olarak yiyebilirsin. Değişim sadece aynı grup içinde yapılır; ekmek yerine et yenmez.</p></div>
     <div class="gtabs" role="tablist">${GKEYS.map(k=>`<button class="gtab" role="tab" style="--c:${gcolor(k)}" data-gtab="${k}" aria-selected="${k===GTAB}">${GROUPS[k].name}</button>`).join("")}</div>
     <p class="tnote">${esc(G.info)}</p>
     <div class="tbl-wrap"><table><thead><tr><th>Besin</th><th>1 değişim</th><th>2 değişim</th></tr></thead><tbody>
-    ${G.foods.map(f=>`<tr><td>${esc(f.name)}${f.gi?' <span style="color:var(--g-meyve)">*</span>':""}${f.note?`<div class="hint">${esc(f.note)}</div>`:""}</td><td class="num">${esc(amount(f,1))}</td><td class="num">${esc(amount(f,2))}</td></tr>`).join("")}
+    ${G.foods.map(f=>`<tr><td>${esc(f.name)}${f.gi?' <span style="color:var(--g-meyve)">*</span>':""}${f.note?`<div class="hint">${esc(f.note)}</div>`:""}</td><td class="num">${tblAmt(f,1)}</td><td class="num">${tblAmt(f,2)}</td></tr>`).join("")}
     </tbody></table></div>`;
 }
 
@@ -892,8 +920,8 @@ function saveSwap(){
    2) Her satırda miktar + ölçü + besin aranır ("6 yemek kaşığı pilav"), "veya"dan
       sonrası alternatif sayılır.
    3) Besinin değişim tablosundaki 1 değişim ölçüsüyle bölünüp değişim sayısı
-      bulunur: pilav 1 değişim = 2 yk → 6 yk = 3 ekmek değişimi. Aralıklarda
-      ("6-8 yk") üst sınıra en yakın yarım değişim alınır.
+      bulunur: pilav 1 değişim = 2 yemek kaşığı → 6 yemek kaşığı = 3 ekmek değişimi.
+      Aralıklarda ("6-8 yemek kaşığı") üst sınıra en yakın yarım değişim alınır.
    4) Tanınmayan satırlar serbest kalem olur. Sonuç kaydetmeden önce gösterilir. */
 const trLow = x => String(x).toLocaleLowerCase("tr");
 const fold = x => trLow(x).replace(/ç/g,"c").replace(/ğ/g,"g").replace(/ı/g,"i").replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u").replace(/[âàá]/g,"a").replace(/[îíì]/g,"i").replace(/[ûúù]/g,"u");
@@ -1264,7 +1292,7 @@ function viewImport(){
     h += `<section class="meal"><div class="emeal-h"><input type="text" id="imn-${mi}" data-impmeal="${mi}" value="${esc(m.name)}" aria-label="Öğün adı"><input type="text" id="imt-${mi}" data-imptime="${mi}" value="${esc(m.time)}" placeholder="Saat" aria-label="Saat"></div>`;
     m.items.forEach((it,ii)=>{
       const k = mi+"-"+ii;
-      h += `<div class="improw ${it.check?"check":""}"><div class="impc">
+      h += `<div class="improw ${it.check?"check":""}"><div class="impc ${it.kind==="free"?"free":""}">
         <select id="ig-${k}" data-impg="${k}" aria-label="Grup">${gopts(it.kind==="free"?"free":it.group)}</select>
         ${it.kind==="free" ? `<input type="text" id="itx-${k}" data-imptx="${k}" value="${esc(it.text)}" aria-label="Metin">`
           : `<select id="iu-${k}" data-impu="${k}" aria-label="Değişim">${uopts(it.units)}</select>
