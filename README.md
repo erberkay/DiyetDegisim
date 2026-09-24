@@ -1,12 +1,19 @@
-# Recipe App (Educational Project)
+# DiyetDegisim
 
-## Overview
+Diyetisyen listesini değişim (porsiyon eşdeğeri) mantığıyla gösteren tek sayfalık bir site.
 
-Welcome to the Recipe App project repository! This app is a near-end project of a 108-hour course designed to introduce individuals with no prior programming experience to the world of app development. Built with React Native, this app is an educational tool that showcases the essential features and functionalities an app should have.
+## Neler yapar
 
-## Features (to be)
+- Öğün kalemleri aynı gruptaki başka besinlerle değiştirilebilir ya da birkaç besine bölünebilir; miktarlar otomatik hesaplanır.
+- 3 profil var: **Berkay Er** (liste yüklü), **Profil 2** ve **Profil 3**.
+- Değişim tabloları (et, süt, sebze, meyve, ekmek, yağ) ve diyet kuralları sitenin içinde.
 
-- **Recipe Browsing**: Users can browse various recipes based on different categories and cuisines.
-- **Recipe Details**: Users can view detailed recipes with ingredients and instructions.
-- **Favorites**: Users can save their favorite recipes for easy access in the future.
-- **Search Functionality**: Users can search for recipes using keywords.
+## Kullanım
+
+`index.html` dosyasını tarayıcıda aç. Kurulum gerekmez; harici bağımlılık yok (yalnızca Google Fonts).
+
+Veriler tarayıcıda (localStorage) saklanır. Başka cihaza taşımak için **Profili düzenle > Yedek / başka cihaza taşı** bölümünden yedeği kopyala, diğer cihazda yapıştırıp **İçe aktar**'a bas.
+
+## GitHub Pages
+
+Siteyi yayına almak için: **Settings > Pages > Branch: main / root**. Birkaç dakika sonra site `https://erberkay.github.io/DiyetDegisim/` adresinde açılır.
