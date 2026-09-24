@@ -1,0 +1,14 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Her hesap yalnizca kendi listesini okuyup yazabilir.
+    match /users/{uid} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['json', 'updated'])
+        && request.resource.data.json is string
+        && request.resource.data.json.size() < 500000
+        && request.resource.data.updated is int;
+    }
+  }
+}

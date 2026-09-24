@@ -71,6 +71,14 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:
 .tot span::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--c)}
 .tot .lim{font-size:13px;font-weight:500;color:var(--muted)}
 .limnote{margin:8px 2px 0}
+.mroom{margin:0;padding:8px 14px 0;border-top:1px solid var(--line)}
+.improw{display:grid;gap:4px;padding:10px 14px;border-top:1px solid var(--line)}
+.improw.check{background:var(--warn-soft)}
+.impc{display:grid;grid-template-columns:110px 80px 1fr auto;gap:8px;align-items:center}
+.impc input[type=text]{grid-column:span 2}
+@media (max-width:560px){.impc{grid-template-columns:1fr 84px auto}.impc select[data-impf],.impc input[type=text]{grid-column:1/-1;order:3}}
+details.card summary{cursor:pointer;font-weight:600}
+progress{accent-color:var(--accent);height:10px}
 .alert{margin-top:10px;background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:500}
 
 /* meals */
@@ -122,6 +130,7 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:
 .opt .cur{font-size:13px;color:var(--accent);font-weight:600}
 .step{display:flex;align-items:center;gap:6px}
 .step button{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface-2);font-weight:700;font-size:16px;padding:0}
+.step button:disabled{opacity:.3;cursor:not-allowed}
 .step output{min-width:22px;text-align:center;font-weight:700}
 .sheet-f{display:flex;gap:8px;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
 .sheet-f .right{display:flex;gap:8px}
@@ -155,18 +164,30 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .form{display:grid;gap:14px;margin-top:18px}
 .field{display:grid;gap:4px}
 .field label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-input[type=text],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 10px;width:100%}
+input[type=text],input[type=email],input[type=password],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 10px;width:100%}
 textarea{min-height:120px;font-size:12px;font-family:ui-monospace,Menlo,monospace}
 .erow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 14px;border-top:1px solid var(--line)}
 .erow .what{font-size:14px}
-.emeal-h{display:grid;grid-template-columns:1fr 150px auto;gap:8px;padding:12px 14px}
-@media (max-width:520px){.emeal-h{grid-template-columns:1fr 1fr}.emeal-h .btn{grid-column:1/-1}}
+.emeal-h{display:grid;grid-template-columns:1fr 150px;gap:8px;padding:12px 14px}
 .add{display:grid;grid-template-columns:1fr 90px 1fr auto;gap:8px;padding:10px 14px;border-top:1px solid var(--line);background:var(--surface-2)}
 @media (max-width:560px){.add{grid-template-columns:1fr 1fr}}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-weight:600;font-size:13px;z-index:30}
 .sync{font-size:12px;color:var(--muted)}
-@media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
+.account{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.account .who{display:flex;align-items:center;gap:8px;font-weight:500;min-width:0}
+.account .who .dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:600;background:var(--accent);color:var(--accent-ink);flex:none}
+.account .mail{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.auth{max-width:420px;margin:24px auto 0}
+.choices{display:grid;gap:8px}
+.choice{display:grid;gap:2px;text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:12px 14px}
+.choice b{font-weight:600}
+.choice span{font-size:13px;color:var(--muted)}
+button.choice:hover{border-color:var(--accent)}
+div.choice{gap:8px}
+div.choice .field{margin-top:4px}
+div.choice .btn{justify-self:start}
+@media (prefers-reduced-motion:no-preference){.sheet.enter{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
 </style>
 </head>
 <body>
@@ -175,9 +196,9 @@ textarea{min-height:120px;font-size:12px;font-family:ui-monospace,Menlo,monospac
   <header class="top">
     <div class="brand">
       <h1>Değişim Menüsü</h1>
-      <small id="sync" class="sync">Bu cihazda kayıtlı</small>
+      <small id="sync" class="sync" role="status"></small>
     </div>
-    <div class="profiles" id="profiles" role="group" aria-label="Profiller"></div>
+    <div class="account" id="account"></div>
     <nav class="tabs" role="tablist" id="tabs">
       <button class="tab" role="tab" data-tab="menu">Menü</button>
       <button class="tab" role="tab" data-tab="tables">Değişim tabloları</button>
@@ -188,7 +209,11 @@ textarea{min-height:120px;font-size:12px;font-family:ui-monospace,Menlo,monospac
   <main id="main"></main>
 </div>
 <div id="sheet-root"></div>
+<input type="file" id="impfile" accept="image/*" multiple hidden>
 
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 <script>
 /* ============================================================
    DEĞİŞİM SİSTEMİ
@@ -332,7 +357,7 @@ function ex(group, units, food, orig){ return {id:nid(), kind:"ex", group, units
 function fr(text){ return {id:nid(), kind:"free", text}; }
 function berkayPlan(){
   return [
-    {id:nid("m"),name:"Sabah",time:"10.30 – 11.00",items:[
+    {id:nid("m"),key:"sabah",name:"Sabah",time:"10.30 – 11.00",items:[
       fr("Çay, ıhlamur vb. (şekersiz)"),
       ex("et",2,"beyaz","2 dilim peynir"),
       ex("et",1,"yumurta","1 adet yumurta"),
@@ -340,89 +365,189 @@ function berkayPlan(){
       ex("ekmek",3,"tam","3 ince dilim tam buğday / çavdar ekmek"),
       fr("Mevsimine göre domates, salatalık, yeşillik (yağsız)")
     ]},
-    {id:nid("m"),name:"Öğle",time:"14.00 – 14.30",items:[
+    {id:nid("m"),key:"ogle",name:"Öğle",time:"14.00 – 14.30",items:[
       ex("ekmek",3,"pilav","6 yemek kaşığı pilav veya makarna"),
       ex("sebze",2,"sebzeyemegi","6-8 yemek kaşığı sebze yemeği"),
       fr("Salata (az yağlı)"),
       ex("ekmek",1,"tam","1 ince dilim tam buğday / çavdar ekmek"),
       ex("sut",1,"yogurt","4 yk yoğurt veya 2 su bardağı ayran")
     ]},
-    {id:nid("m"),name:"Akşam",time:"17.00 – 17.30",items:[
+    {id:nid("m"),key:"aksam",name:"Akşam",time:"17.00 – 17.30",items:[
       ex("ekmek",4,"pilav","8 yemek kaşığı pilav veya makarna"),
       ex("et",6,"kofte","6 köfte kadar dana eti / tavuk / hindi / balık"),
       fr("Salata (az yağlı)"),
       ex("ekmek",1,"tam","1 ince dilim tam buğday / çavdar ekmek")
     ]},
-    {id:nid("m"),name:"Gece · spor sonrası",time:"21.00 – 21.30",items:[
+    {id:nid("m"),key:"gece",name:"Gece · spor sonrası",time:"21.00 – 21.30",items:[
       ex("meyve",2,"elma","2 porsiyon meyve (Tablo 4)"),
       ex("sut",1,"yogurt","4 yk yoğurt veya 1 su bardağı süt")
     ]}
   ];
 }
-function freshState(){
-  return {v:1, updated:Date.now(), active:"p1", profiles:{
-    p1:{name:"Berkay Er", fullName:"Mehmet Berkay Er", source:"Aydın Kuşadası İlçe Sağlık Müdürlüğü", meals:berkayPlan(), log:{}},
-    p2:{name:"Profil 2", meals:[], log:{}},
-    p3:{name:"Profil 3", meals:[], log:{}}
-  }};
-}
+/* ---------- hesaplar ----------
+   Her profil kendi e-posta + şifresiyle girer. Liste Firestore'da
+   users/{uid} belgesinde durur; kurallar gereği herkes yalnızca kendi
+   belgesini okuyup yazabilir (firestore.rules). Bu cihazda da hesap
+   başına bir kopya tutulur, çıkış yapınca silinir. */
+const FB_CONFIG = {
+  apiKey:"AIzaSyDiGD-u9BPy6Ek4_edkp97Juy8OVubVhK8",
+  authDomain:"diyetdegisim.firebaseapp.com",
+  projectId:"diyetdegisim",
+  storageBucket:"diyetdegisim.firebasestorage.app",
+  messagingSenderId:"47081289859",
+  appId:"1:47081289859:web:261d58c0befa02ea7283b6"
+};
+let auth = null, fsdb = null;
+try{
+  firebase.initializeApp(FB_CONFIG);
+  auth = firebase.auth(); fsdb = firebase.firestore();
+  auth.languageCode = "tr";
+  if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /[?&]emu\b/.test(location.search)){
+    auth.useEmulator("http://127.0.0.1:9099"); fsdb.useEmulator("127.0.0.1", 8080);
+  }
+}catch(e){ auth = null; }
 
-/* ---------- storage: browser + (artifact'te) paylaşılan kayıt ---------- */
-const LS_KEY = "degisim-menusu-v1";
-let S; let db = null;
-try{ const raw = localStorage.getItem(LS_KEY); if(raw) S = JSON.parse(raw); }catch(e){}
-if(!S || !S.profiles) S = freshState();
-function migrate(){ const p1 = S.profiles.p1; if(p1 && p1.fullName===undefined){ p1.fullName="Mehmet Berkay Er"; p1.source="Aydın Kuşadası İlçe Sağlık Müdürlüğü"; } }
-migrate();
-let saveTimer = null;
-function save(){
-  S.updated = Date.now();
-  try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){}
-  if(db){
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(()=>{
-      db.doc("app/state").set({json:JSON.stringify(S)})
-        .then(()=>setSync("Hesabına kaydedildi"))
-        .catch(()=>setSync("Kaydedilemedi, bu cihazda duruyor"));
-    }, 600);
+let USER = null;        // giriş yapan hesap
+let ME = null;          // bu hesabın profili: {name, fullName, source, plan, meals, log, updated}
+let AUTH_READY = false, LOADING = false, LOAD_ERR = false;
+let AUTH_MODE = "login", AUTH_EMAIL = "";
+
+const berkayProfile = () => ({name:"Berkay Er", fullName:"Mehmet Berkay Er", source:"Aydın Kuşadası İlçe Sağlık Müdürlüğü", plan:"berkay", meals:berkayPlan(), diet:{meals:berkayPlan(), at:0}, log:{}});
+// Berkay Er'in listesi yalnız onun hesabına açılır. Depo herkese açık olduğu için
+// e-posta düz yazılmaz, SHA-256 özeti karşılaştırılır.
+const BERKAY_EMAIL_SHA256 = "35c5d99188cdb952a46730a75dfd3f225dca379757b7d8b8012ed5d25521586f";
+let IS_BERKAY = false;
+async function sha256hex(t){ const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""); }
+const cacheKey = u => "degisim-hesap-" + u.uid;
+// önceki sürüm (hesapsız) verileri bu cihazda bu anahtarla duruyor; ilk girişte taşınabilir
+const LEGACY_KEY = "degisim-menusu-v1";
+function legacyProfiles(){
+  try{ const o = JSON.parse(localStorage.getItem(LEGACY_KEY)||"null"); if(!o || !o.profiles) return [];
+    return ["p1","p2","p3"].filter(id=>(id==="p1")===IS_BERKAY && o.profiles[id] && !o.profiles[id].moved && (o.profiles[id].meals||[]).length).map(id=>({id, p:o.profiles[id]})); }catch(e){ return []; }
+}
+// bir hesaba taşınan eski kayıt bu cihazda başka hesaba bir daha önerilmez
+function markLegacyMoved(id){
+  try{ const o = JSON.parse(localStorage.getItem(LEGACY_KEY)||"null"); if(!o || !o.profiles || !o.profiles[id]) return;
+    o.profiles[id] = {name:o.profiles[id].name, moved:true, meals:[], log:{}};
+    localStorage.setItem(LEGACY_KEY, JSON.stringify(o)); }catch(e){}
+}
+const MEAL_KEYS = {"sabah":"sabah","öğle":"ogle","akşam":"aksam","gece · spor sonrası":"gece"};
+const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+const okNum = x => typeof x==="number" && isFinite(x) && x > 0;
+function migrateProfile(p){
+  if(!p) return;
+  p.meals = Array.isArray(p.meals) ? p.meals.filter(m=>m && typeof m==="object") : []; p.log = (p.log && typeof p.log==="object") ? p.log : {};
+  if(typeof p.name!=="string" || !p.name.trim()) p.name = "Profilim";
+  // id'ler HTML özniteliğine yazılıyor; beklenmedik karakter içerenleri yenile
+  const safeId = x => typeof x==="string" && /^[A-Za-z0-9_-]{1,40}$/.test(x);
+  p.meals.forEach(m=>{ if(!safeId(m.id)) m.id = nid("m"); if(m.key!==undefined && !safeId(m.key)) delete m.key; m.name = String(m.name||""); m.time = String(m.time||"");
+    (Array.isArray(m.items)?m.items:[]).forEach(it=>{ if(it && !safeId(it.id)) it.id = nid(); }); });
+  // bozuk kalemleri ve toplamı tutmayan değişim seçimlerini ayıkla
+  p.meals.forEach(m=>{
+    m.items = (Array.isArray(m.items) ? m.items : []).filter(it=> it && (it.kind==="free" ? typeof it.text==="string"
+      : it.kind==="ex" && own(GROUPS, it.group) && okNum(it.units) && Array.isArray(it.def) && it.def.length
+        && it.def.every(x=>x && FOOD[it.group+":"+x.f] && okNum(x.u)) && Math.abs(it.def.reduce((a,x)=>a+x.u,0)-it.units) < 1e-9));
+    m.items.forEach(it=>{ if(it.kind!=="ex" || !it.sel) return;
+      const ok = Array.isArray(it.sel) && it.sel.length && it.sel.every(x=>x && FOOD[it.group+":"+x.f] && okNum(x.u)) && Math.abs(it.sel.reduce((a,x)=>a+x.u,0)-it.units) < 1e-9;
+      if(!ok) it.sel = null; });
+  });
+  if(p.plan==="berkay" && !(p.diet && Array.isArray(p.diet.meals))) p.diet = {meals: berkayPlan(), at: 0};
+  if(!(p.diet && Array.isArray(p.diet.meals))){ delete p.diet; return; }
+  const plan = p.diet.meals.filter(m=>m && m.key && Array.isArray(m.items));
+  p.diet.meals = plan;
+  const lim = dietLimits(p);
+  // öğün limitleri key ile bulunur. Geçersiz/tekrarlı key'leri sil; key'siz öğünleri
+  // önce adla, sonra saatle, sonra içeriği listedeki tek bir öğüne sığıyorsa onunla eşleştir.
+  const used = new Set();
+  p.meals.forEach(m=>{ if(m.key && (!lim.perMeal[m.key] || used.has(m.key))) delete m.key; if(m.key) used.add(m.key); });
+  const give = (m, k) => { if(k && lim.perMeal[k] && !used.has(k)){ m.key = k; used.add(k); } };
+  const norm = x => String(x||"").trim().toLocaleLowerCase("tr");
+  p.meals.forEach(m=>{ if(!m.key) give(m, (plan.find(x=>norm(x.name)===norm(m.name))||{}).key || (own(MEAL_KEYS, norm(m.name)) ? MEAL_KEYS[norm(m.name)] : null)); });
+  p.meals.forEach(m=>{ if(!m.key && m.time) give(m, (plan.find(x=>norm(x.time)===norm(m.time))||{}).key); });
+  // içerik eşleşmesi: yalnız tek bir boş öğüne sığan öğüne ver; her atamadan sonra yeniden dene
+  for(let changed = true; changed; ){
+    changed = false;
+    p.meals.forEach(m=>{
+      if(m.key || !m.items.some(it=>it.kind==="ex")) return;
+      const mt = mealTotals(m);
+      const fits = plan.map(x=>x.key).filter(k=>!used.has(k) && GKEYS.every(g=>mt[g] <= lim.perMeal[k][g] + 1e-9));
+      if(fits.length===1){ give(m, fits[0]); changed = true; }
+    });
   }
 }
+
+let saveTimer = null, pending = null;
 function setSync(t){ document.getElementById("sync").textContent = t; }
-(async ()=>{
+function save(){
+  if(!ME || !USER) return;
+  ME.updated = Date.now();
+  const u = USER, json = JSON.stringify(ME), updated = ME.updated;
+  try{ localStorage.setItem(cacheKey(u), json); }catch(e){}
+  setSync("Kaydediliyor…");
+  clearTimeout(saveTimer);
+  // çevrimdışıyken set() hiç bitmeyebilir; 6 sn içinde onay gelmezse kaydedilemedi say
+  pending = () => Promise.race([fsdb.collection("users").doc(u.uid).set({json, updated}), new Promise((_,j)=>setTimeout(()=>j(new Error("zaman aşımı")), 6000))])
+    .then(()=>{ if(USER===u) setSync("Hesabına kaydedildi"); return true; })
+    .catch(()=>{ if(USER===u) setSync("Kaydedilemedi, bu cihazda duruyor"); return false; });
+  saveTimer = setTimeout(()=>{ const f=pending; pending=null; f(); }, 600);
+}
+function flushSave(){ clearTimeout(saveTimer); const f=pending; pending=null; return f ? f() : Promise.resolve(true); }
+function readProfile(json){
+  // bozuk ya da elle değiştirilmiş kayıt uygulamayı kilitlemesin
+  try{ const o = JSON.parse(json); return o && typeof o==="object" && !Array.isArray(o) ? o : null; }catch(e){ return null; }
+}
+
+async function loadMe(u){
+  LOADING = true; LOAD_ERR = false; ME = null; render();
+  try{ IS_BERKAY = (await sha256hex(String(u.email||"").trim().toLowerCase())) === BERKAY_EMAIL_SHA256; }catch(e){ IS_BERKAY = false; }
+  if(USER!==u) return;
+  let local = null; try{ local = readProfile(localStorage.getItem(cacheKey(u))||"null"); }catch(e){}
   try{
-    if(!window.claude || !window.claude.use) return;
-    const d = await window.claude.use("db");
-    if(!d) return;
-    const snap = await d.doc("app/state").get();
-    db = d;
-    if(snap.exists){
-      const remote = JSON.parse(snap.data().json);
-      if(remote && remote.profiles && (remote.updated||0) >= (S.updated||0)){ S = remote; migrate(); render(); }
-      else save();
-    } else save();
-    setSync("Hesabına kaydediliyor");
-  }catch(e){}
-})();
+    const snap = await fsdb.collection("users").doc(u.uid).get();
+    if(USER!==u) return;
+    const remote = snap.exists ? readProfile((snap.data()||{}).json) : null;
+    if(remote && !(local && (local.updated||0) > (remote.updated||0))){
+      ME = remote; setSync("Hesabına kayıtlı");
+      try{ localStorage.setItem(cacheKey(u), JSON.stringify(remote)); }catch(e){}   // cihazdaki eski kopya yenisinin üstüne yazmasın
+    }
+    else if(local){ ME = local; migrateProfile(ME); save(); }
+  }catch(e){
+    if(USER!==u) return;
+    if(local){ ME = local; setSync("Çevrimdışı: bu cihazdaki kopya gösteriliyor"); }
+    else LOAD_ERR = true;
+  }
+  if(!ME && !LOAD_ERR && IS_BERKAY && !legacyProfiles().length){ ME = berkayProfile(); migrateProfile(ME); save(); }
+  migrateProfile(ME);
+  LOADING = false; render();
+}
+let SIGNING_OUT = false;
+if(auth) auth.onAuthStateChanged(u=>{
+  AUTH_READY = true; USER = u; ME = null; SW = null; IMP = null; renderSheet(); confirmKey = null;
+  LOADING = false; LOAD_ERR = false; SIGNING_OUT = false; IS_BERKAY = false;
+  if(u) loadMe(u); else { AUTH_MODE = "login"; AUTH_EMAIL = ""; setSync(""); render(); }
+});
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const P = () => S.profiles[S.active];
+const P = () => ME;
 const todayKey = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
-const FR = [[1/8,"⅛"],[1/4,"¼"],[1/3,"⅓"],[3/8,"⅜"],[1/2,"½"],[5/8,"⅝"],[2/3,"⅔"],[3/4,"¾"],[7/8,"⅞"]];
+const FR = [[1/16,"1/16"],[1/8,"⅛"],[1/6,"⅙"],[3/16,"3/16"],[1/4,"¼"],[5/16,"5/16"],[1/3,"⅓"],[3/8,"⅜"],[7/16,"7/16"],[1/2,"½"],[9/16,"9/16"],[5/8,"⅝"],[2/3,"⅔"],[11/16,"11/16"],[3/4,"¾"],[13/16,"13/16"],[5/6,"⅚"],[7/8,"⅞"],[15/16,"15/16"]];
 function fmtNum(x){
   const w = Math.floor(x+1e-9), r = x - w;
-  if(r < 0.02) return String(w);
-  if(r > 0.98) return String(w+1);
-  const hit = FR.find(([v])=>Math.abs(v-r)<0.02);
-  if(hit) return (w? w+" ":"") + hit[1];
-  return (Math.round(x*10)/10).toString().replace(".",",");
+  if(r < 0.01) return String(w);
+  if(r > 0.99) return String(w+1);
+  const hit = FR.reduce((b,e)=>Math.abs(e[0]-r) < Math.abs(b[0]-r) ? e : b);
+  if(Math.abs(hit[0]-r) < 0.01) return (w? w+" ":"") + hit[1];
+  return fmtDec(x);
 }
+// gram ve ml kesirle değil ondalıkla yazılır: 12,5 g
+const fmtDec = x => (Math.round(x*10)/10).toString().replace(".",",");
 function amount(f, units){
   const q = Array.isArray(f.n) ? f.n.map(v=>fmtNum(v*units)).join("-") : fmtNum(f.n*units);
   let extra = "";
-  if(f.g) extra = " · " + fmtNum(f.g*units) + " g";
-  else if(f.ml) extra = " · " + fmtNum(f.ml*units) + " ml";
+  if(f.g) extra = " · " + fmtDec(f.g*units) + " g";
+  else if(f.ml) extra = " · " + fmtDec(f.ml*units) + " ml";
   return q + " " + f.u + extra;
 }
 function portions(it){ return it.sel || it.def; }
@@ -439,16 +564,34 @@ function totals(p){
   return {t, gi};
 }
 /* ---------- limitler ----------
-   Berkay Er'in listesindeki günlük değişim sayıları üst sınırdır:
-   bir öğüne kalem eklenerek ya da değiştirme ekranında fazla seçilerek
-   aşılamaz. * işaretli meyveler her profilde günde en fazla 1 porsiyon. */
-const BERKAY_LIMITS = {et:9, sut:2, sebze:2, meyve:2, ekmek:12, yag:1};
+   Berkay Er'in listesindeki değişim sayıları üst sınırdır, hem öğün
+   öğün hem günlük: Et 9, Süt 2, Sebze 2, Meyve 2, Ekmek 12, Yağ 1.
+   Kalem eklenerek, öğünler arasında kaydırılarak ya da değiştirme
+   ekranında fazla seçilerek aşılamaz. * işaretli meyveler her profilde
+   günde en fazla 1 porsiyon. */
+const zeroT = () => { const t={}; GKEYS.forEach(k=>t[k]=0); return t; };
+function mealTotals(m){ const t=zeroT(); m.items.forEach(it=>{ if(it.kind==="ex") t[it.group]+=it.units; }); return t; }
+// limitler profilin kayıtlı diyetisyen listesinden (p.diet) hesaplanır
+const LIM_CACHE = new WeakMap();
+function dietLimits(p){
+  const d = p && p.diet; if(!d || !Array.isArray(d.meals)) return null;
+  if(LIM_CACHE.has(d)) return LIM_CACHE.get(d);
+  const perMeal = Object.create(null), daily = zeroT();
+  d.meals.forEach(m=>{ if(!m.key) return; const t = mealTotals(m); perMeal[m.key] = t; GKEYS.forEach(k=>daily[k]+=t[k]); });
+  const r = {perMeal, daily}; LIM_CACHE.set(d, r); return r;
+}
 const GI_MAX = 1;
-const limitsOf = id => id==="p1" ? BERKAY_LIMITS : null;
-function overLimits(p, id){
-  const L = limitsOf(id); if(!L) return [];
+const isLocked = p => !!dietLimits(p);
+const limitsOf = p => isLocked(p) ? dietLimits(p).daily : null;
+// listede olmayan (sonradan eklenen) öğüne değişim eklenemez, sadece serbest kalem
+const mealLimitsOf = (p, m) => { const L = dietLimits(p); return L ? (m.key && L.perMeal[m.key] ? L.perMeal[m.key] : zeroT()) : null; };
+function overLimits(p){
+  const L = limitsOf(p); if(!L) return [];
   const {t} = totals(p);
-  return GKEYS.filter(k=>t[k] > L[k] + 1e-9).map(k=>`${GROUPS[k].name} ${fmtNum(t[k])}/${fmtNum(L[k])}`);
+  const out = GKEYS.filter(k=>t[k] > L[k] + 1e-9).map(k=>`Günlük ${GROUPS[k].name.toLocaleLowerCase("tr")} ${fmtNum(t[k])}/${fmtNum(L[k])}`);
+  p.meals.forEach(m=>{ const ML=mealLimitsOf(p,m), mt=mealTotals(m);
+    GKEYS.forEach(k=>{ if(mt[k] > ML[k] + 1e-9) out.push(`${m.name}: ${GROUPS[k].name.toLocaleLowerCase("tr")} ${fmtNum(mt[k])}/${fmtNum(ML[k])}`); }); });
+  return out;
 }
 function giOutside(iid){
   let gi = 0;
@@ -466,22 +609,78 @@ const CHECK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke
 
 /* ---------- ui state ---------- */
 let TAB = "menu", GTAB = "ekmek";
+let SW = null; // değiştirme penceresi: {iid, counts:{}, step}
 try{ TAB = localStorage.getItem("degisim-tab") || "menu"; }catch(e){}
 let confirmKey = null;
 
+function onboard(choice, nm){
+  if(choice==="berkay"){ if(!IS_BERKAY) return; ME = berkayProfile(); }
+  else if(choice==="empty") ME = {name:nm||"Profilim", meals:[], log:{}};
+  else { const x = legacyProfiles().find(l=>"legacy:"+l.id===choice); if(!x) return;
+    ME = JSON.parse(JSON.stringify(x.p)); if(x.id==="p1"){ ME.plan="berkay"; delete ME.diet; } markLegacyMoved(x.id); }
+  migrateProfile(ME); save(); TAB="menu"; render(); toast("Liste hesabına kaydedildi");
+}
+function initials(name){ return String(name||"").trim().split(/\s+/).map(w=>w[0]||"").join("").slice(0,2).toLocaleUpperCase("tr") || "?"; }
 function render(){
-  // profiles
-  $("#profiles").innerHTML = ["p1","p2","p3"].map(id=>{
-    const p = S.profiles[id]; const ini = p.name.trim().split(/\s+/).map(w=>w[0]||"").join("").slice(0,2).toLocaleUpperCase("tr");
-    return `<button class="pbtn" data-profile="${id}" aria-pressed="${S.active===id}"><span class="dot">${esc(ini||"?")}</span>${esc(p.name)}</button>`;
-  }).join("");
+  const acc = $("#account");
+  if(USER) acc.innerHTML = `<span class="who"><span class="dot">${esc(initials(ME?ME.name:USER.email))}</span><span>${ME?esc(ME.name):""} <span class="mail">${esc(USER.email||"")}</span></span></span>
+    <button class="btn ghost" data-act="signout">Çıkış yap</button>`;
+  else acc.innerHTML = AUTH_READY||!auth ? `<span class="mail">Giriş yapılmadı. Tabloları ve kuralları giriş yapmadan da görebilirsin.</span>` : "";
   document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===TAB));
   const main = $("#main");
-  if(TAB==="menu") main.innerHTML = viewMenu();
-  else if(TAB==="tables") main.innerHTML = viewTables();
+  if(TAB==="tables") main.innerHTML = viewTables();
   else if(TAB==="rules") main.innerHTML = viewRules();
+  else if(!auth) main.innerHTML = `<div class="empty"><h2>Bağlanılamadı</h2><p>Giriş servisi yüklenemedi. İnternet bağlantını kontrol edip sayfayı yenile.</p></div>`;
+  else if(SIGNING_OUT) main.innerHTML = `<div class="empty"><p>Çıkış yapılıyor…</p></div>`;
+  else if(!AUTH_READY || LOADING) main.innerHTML = `<div class="empty"><p>Yükleniyor…</p></div>`;
+  else if(!USER) main.innerHTML = viewAuth();
+  else if(LOAD_ERR) main.innerHTML = `<div class="empty"><h2>Liste yüklenemedi</h2><p>İnternet bağlantını kontrol et.</p><button class="btn primary" data-act="retry">Tekrar dene</button></div>`;
+  else if(IMP) main.innerHTML = viewImport();
+  else if(!ME) main.innerHTML = viewOnboard();
+  else if(TAB==="menu") main.innerHTML = viewMenu();
   else main.innerHTML = viewEdit();
 }
+
+function viewAuth(){
+  const up = AUTH_MODE==="signup";
+  return `<div class="card auth"><h2>${up?"Hesap oluştur":"Giriş yap"}</h2>
+    <p class="hint">Her profil kendi e-postası ve şifresiyle girer. Herkes yalnızca kendi listesini görür ve değiştirir.</p>
+    <form id="authform" class="form" novalidate>
+      <div class="field"><label for="aemail">E-posta</label><input type="email" id="aemail" autocomplete="email" value="${esc(AUTH_EMAIL)}" required></div>
+      <div class="field"><label for="apass">Şifre</label><input type="password" id="apass" autocomplete="${up?"new-password":"current-password"}" minlength="6" required></div>
+      ${up?`<div class="field"><label for="apass2">Şifre (tekrar)</label><input type="password" id="apass2" autocomplete="new-password" minlength="6" required></div>`:""}
+      <p class="alert" id="autherr" hidden></p>
+      <button class="btn primary" type="submit" id="asubmit">${up?"Hesap oluştur":"Giriş yap"}</button>
+    </form>
+    <div class="row">
+      <button class="btn ghost" data-authmode="${up?"login":"signup"}">${up?"Zaten hesabın var mı? Giriş yap":"Hesabın yok mu? Hesap oluştur"}</button>
+      ${up?"":`<button class="btn ghost" data-act="resetpass">Şifremi unuttum</button>`}
+    </div></div>`;
+}
+function viewOnboard(){
+  const legacy = legacyProfiles();
+  return `<div class="card auth"><h2>Listeni seç</h2>
+    <p class="hint">Bu hesap için bir başlangıç seç. Sonradan “Profili düzenle”den değiştirebilirsin.</p>
+    <div class="choices">
+      ${IS_BERKAY?`<button class="choice" data-onboard="berkay"><b>Berkay Er'in diyetisyen listesi</b><span>Aydın Kuşadası İlçe Sağlık Müdürlüğü listesi. Değişim limitleri kilitli.</span></button>`:
+      `<button class="choice" data-imp="start"><b>Diyetisyen listemi fotoğraftan ekle</b><span>Listenin fotoğrafını çek; öğünler ve değişimler otomatik çıkarılır, kaydetmeden önce kontrol edersin.</span></button>`}
+      ${legacy.map(x=>`<button class="choice" data-onboard="legacy:${x.id}"><b>Bu cihazdaki kayıt: ${esc(x.p.name)}</b><span>Hesaplardan önce bu tarayıcıda tutulan liste ve değişimler taşınır.</span></button>`).join("")}
+      <div class="choice"><b>Boş liste</b><span>Kendi diyetisyen listeni öğün öğün gir.</span>
+        <div class="field"><label for="oname">Profil adı</label><input type="text" id="oname" value="${esc((USER.email||"").split("@")[0])}"></div>
+        <button class="btn primary" data-onboard="empty">Boş listeyle başla</button></div>
+    </div></div>`;
+}
+function authError(e){
+  const c = e && e.code || "";
+  if(/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c)) return "E-posta ya da şifre yanlış.";
+  if(/email-already-in-use/.test(c)) return "Bu e-postayla zaten bir hesap var. Giriş yap.";
+  if(/weak-password/.test(c)) return "Şifre en az 6 karakter olmalı.";
+  if(/invalid-email|missing-email/.test(c)) return "E-posta adresi geçersiz.";
+  if(/too-many-requests/.test(c)) return "Çok fazla deneme yapıldı. Biraz bekleyip tekrar dene.";
+  if(/network-request-failed/.test(c)) return "İnternet bağlantısı yok.";
+  return "İşlem yapılamadı" + (c ? " (" + c + ")." : ".");
+}
+function showAuthErr(msg){ const el = $("#autherr"); if(el){ el.textContent = msg; el.hidden = !msg; } }
 
 function viewMenu(){
   const p = P();
@@ -489,18 +688,18 @@ function viewMenu(){
     return `<div class="empty"><h2>${esc(p.name)} için liste yok</h2>
       <p>Diyetisyenin verdiği listeyi öğün öğün ekle. Her kalemi grup ve değişim sayısıyla girersen menüden değiştirebilirsin.</p>
       <div class="row"><button class="btn primary" data-go="edit">Liste oluştur</button>
-      <button class="btn" data-act="copy-berkay">Berkay Er'in listesini kopyala</button></div></div>`;
+      ${isLocked(p)?`<button class="btn" data-act="reset">Diyetisyen listesini geri yükle</button>`:`<button class="btn" data-imp="start">Fotoğraftan ekle</button>`}</div></div>`;
   }
   const {t, gi} = totals(p);
-  const L = limitsOf(S.active);
+  const L = limitsOf(p);
   const log = p.log[todayKey()] || {};
   const d = new Date().toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long"});
   const who = [p.fullName, p.source].filter(Boolean).map(esc).join(" · ");
   let h = (who?`<p class="owner">${who}</p>`:"") + `<div class="day"><h2>Günlük değişim</h2><span class="meta">${esc(d)}</span></div>
     <div class="totals">${GKEYS.map(k=>`<div class="tot" style="--c:${gcolor(k)}"><b class="tnum">${fmtNum(t[k])}${L?`<small class="lim"> / ${fmtNum(L[k])}</small>`:""}</b><span>${GROUPS[k].name}</span></div>`).join("")}</div>`;
-  if(L) h += `<p class="hint limnote">Sayılar diyetisyenin verdiği günlük limittir; değişim sadece bu sınırlar içinde yapılır.</p>`;
-  const over = overLimits(p, S.active);
-  if(over.length) h += `<div class="alert">Liste günlük limiti aşıyor: ${esc(over.join(", "))}. Profili düzenle'den fazla kalemi sil ya da diyetisyen listesine sıfırla.</div>`;
+  if(L) h += `<p class="hint limnote">Sayılar diyetisyenin verdiği limittir. Değişim sadece aynı öğün ve aynı grup içinde, bu sınırlarla yapılır.</p>`;
+  const over = overLimits(p);
+  if(over.length) h += `<div class="alert">Liste diyetisyen limitini aşıyor: ${esc(over.join(", "))}. Profili düzenle'den fazla kalemi sil ya da diyetisyen listesine sıfırla.</div>`;
   if(gi>GI_MAX) h += `<div class="alert">Kan şekerini hızlı yükselten (*) meyveden bugün ${fmtNum(gi)} porsiyon seçili. Listeye göre günde en fazla 1 porsiyon.</div>`;
   h += `<div class="meals">`;
   p.meals.forEach(m=>{
@@ -548,21 +747,24 @@ function viewEdit(){
     <div class="field"><label for="pname">Profil adı</label><input type="text" id="pname" value="${esc(p.name)}"></div>
     <div class="field"><label for="pfull">Listedeki hasta adı</label><input type="text" id="pfull" value="${esc(p.fullName||"")}"></div>
     <div class="field"><label for="psrc">Listeyi veren kurum</label><input type="text" id="psrc" value="${esc(p.source||"")}"></div>`;
-  const L = limitsOf(S.active);
+  const L = limitsOf(p);
   if(L){ const {t} = totals(p);
     h += `<div class="card"><h2>Günlük değişim limiti</h2>
-      <p class="hint">Diyetisyen listesindeki sayılar üst sınırdır. Kalem ekleyerek aşılamaz; yeni kalem eklemek için önce aynı gruptan bir kalemi sil.</p>
+      <p class="hint">Diyetisyen listesindeki sayılar öğün öğün üst sınırdır. Kalem ekleyerek ya da başka öğüne kaydırarak aşılamaz; yeni kalem eklemek için önce aynı öğünden, aynı gruptan bir kalemi sil.</p>
       <div class="totals">${GKEYS.map(k=>`<div class="tot" style="--c:${gcolor(k)}"><b class="tnum">${fmtNum(t[k])}<small class="lim"> / ${fmtNum(L[k])}</small></b><span>${GROUPS[k].name}</span></div>`).join("")}</div></div>`; }
   p.meals.forEach((m,mi)=>{
     h += `<section class="meal"><div class="emeal-h">
       <input type="text" id="mn-${m.id}" data-mname="${m.id}" value="${esc(m.name)}" aria-label="Öğün adı">
       <input type="text" id="mt-${m.id}" data-mtime="${m.id}" value="${esc(m.time||"")}" placeholder="Saat" aria-label="Saat">
-      <button class="btn danger ghost" data-delmeal="${m.id}">${confirmKey==="meal:"+m.id?"Emin misin? Sil":"Öğünü sil"}</button></div>`;
+      </div>`;
     m.items.forEach(it=>{
       const txt = it.kind==="free" ? `<span class="chip" style="--c:var(--g-serbest)">Serbest</span> ${esc(it.text)}` :
         `<span class="chip" style="--c:${gcolor(it.group)}">${GROUPS[it.group].name} <span class="n">× ${fmtNum(it.units)}</span></span> ${esc(FOOD[it.group+":"+it.def[0].f]?.name||"")}${it.orig?` <span class="hint">(${esc(it.orig)})</span>`:""}`;
       h += `<div class="erow"><div class="what">${txt}</div><button class="btn ghost danger" data-delitem="${m.id}|${it.id}" aria-label="Kalemi sil">Sil</button></div>`;
     });
+    const ML = mealLimitsOf(p, m);
+    if(ML){ const mt = mealTotals(m); const room = GKEYS.filter(k=>ML[k]-mt[k] > 1e-9).map(k=>`${GROUPS[k].name} ${fmtNum(ML[k]-mt[k])}`);
+      h += `<p class="hint mroom">${room.length ? `Bu öğüne eklenebilir: ${room.join(", ")}` : m.key ? "Bu öğünün değişimleri dolu. Eklemek için önce bir kalem sil; serbest kalem eklenebilir." : "Bu öğün diyetisyen listesinde yok; sadece serbest kalem eklenebilir."}</p>`; }
     h += `<div class="add" data-addrow="${m.id}">
       <select id="ag-${m.id}" data-addgroup="${m.id}" aria-label="Grup">${gopts}</select>
       <select id="au-${m.id}" aria-label="Değişim sayısı">${[.5,1,1.5,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n===1?"selected":""}>× ${fmtNum(n)}</option>`).join("")}</select>
@@ -570,13 +772,12 @@ function viewEdit(){
       <button class="btn primary" data-additem="${m.id}">Ekle</button></div></section>`;
   });
   h += `<div class="row"><button class="btn" data-act="addmeal">+ Öğün ekle</button>
-    ${S.active==="p1"?`<button class="btn danger" data-act="reset">${confirmKey==="reset"?"Emin misin? Orijinale dön":"Diyetisyen listesine sıfırla"}</button>`:`<button class="btn" data-act="copy-berkay">${confirmKey==="copy"?"Emin misin? Üzerine yaz":"Berkay Er'in listesini kopyala"}</button>`}
+    ${isLocked(p)?`<button class="btn danger" data-act="reset">${confirmKey==="reset"?"Emin misin? Orijinale dön":"Diyetisyen listesine sıfırla"}</button>`:""}
     <button class="btn ghost" data-act="clearswaps">Tüm değişimleri geri al</button></div>
-    <div class="card"><h2>Yedek / başka cihaza taşı</h2>
-      <p class="hint">Tüm profilleri metin olarak kopyala, diğer cihazda buraya yapıştırıp “İçe aktar”a bas.</p>
-      <textarea id="io" aria-label="Yedek verisi"></textarea>
-      <div class="row"><button class="btn" data-act="export">Yedeği göster ve kopyala</button><button class="btn" data-act="import">İçe aktar</button></div>
-    </div></div>`;
+    <div class="card"><h2>Yeni diyetisyen listesi</h2>
+      <p class="hint">Diyetisyen yeni liste verince fotoğrafını ekle: öğünler ve değişim sayıları otomatik çıkarılır, kaydetmeden önce kontrol edip düzeltirsin. Kaydedilen liste yeni limitin olur.</p>
+      <div class="row"><button class="btn primary" data-imp="start">Fotoğraftan liste ekle</button><button class="btn" data-imp="text">Metni yapıştır</button></div></div>
+    <p class="hint">Liste hesabına kaydedilir; aynı e-postayla girdiğin her cihazda görünür.</p></div>`;
   return h;
 }
 function foodSelect(mid, g){
@@ -585,57 +786,509 @@ function foodSelect(mid, g){
 }
 
 /* ---------- swap sheet ---------- */
-let SW = null; // {mid, iid, counts:{}}
-function findItem(iid){ for(const m of P().meals){ const it=m.items.find(x=>x.id===iid); if(it) return {m,it}; } return null; }
+function findItem(iid){ if(!P()) return null; for(const m of P().meals){ const it=m.items.find(x=>x.id===iid); if(it) return {m,it}; } return null; }
+const sumCounts = c => Object.values(c).reduce((a,b)=>a+b,0);
+const giOfCounts = (g, c) => Object.entries(c).reduce((a,[fid,u])=>a+(FOOD[g+":"+fid]?.gi?u:0),0);
+const giOfList = (g, list) => (list||[]).reduce((a,x)=>a+(FOOD[g+":"+x.f]?.gi?x.u:0),0);
+const giFits = (it, c) => giOutside(it.id) + giOfCounts(it.group, c) <= GI_MAX + 1e-9;
+// kaydetmeye engel: yalnız bu pencere * meyveyi artırıp sınırı aşıyorsa (gün zaten aşılmışsa başka kalemler kilitlenmesin)
+const giSheetOk = (it, c) => giFits(it, c) || giOfCounts(it.group, c) <= giOfList(it.group, portions(it)) + 1e-9;
 function openSwap(iid){
   const r = findItem(iid); if(!r) return;
   const counts = {}; portions(r.it).forEach(x=>counts[x.f]=(counts[x.f]||0)+x.u);
-  SW = {iid, counts, step: r.it.units % 1 ? .5 : 1};
-  renderSheet();
+  SW = {iid, counts, step: r.it.units % 1 ? .5 : 1, note:"", opener:iid};
+  renderSheet(true);
+}
+function closeSwap(){
+  const opener = SW && SW.opener; SW = null; renderSheet();
+  if(opener) document.querySelector(`[data-swap="${opener}"]`)?.focus();
 }
 function giRoom(it){
   // bu kalemde * meyveye ayrılabilecek en fazla porsiyon
-  const inSheet = Object.entries(SW.counts).reduce((a,[fid,u])=>a+(FOOD[it.group+":"+fid]?.gi?u:0),0);
-  return Math.max(0, GI_MAX - giOutside(it.id) - inSheet);
+  return Math.max(0, GI_MAX - giOutside(it.id) - giOfCounts(it.group, SW.counts));
 }
-function canInc(it, f, used){
-  if(used + SW.step > it.units + 1e-9) return false;
-  if(f.gi && giRoom(it) < SW.step - 1e-9) return false;
-  return true;
+// + : kalem doluysa en çok seçili diğer besinden bir adım düşer, toplam hep aynı kalır
+function incPlan(it, fid){
+  const f = FOOD[it.group+":"+fid], st = SW.step, base = SW.counts;
+  const attempt = donor => {
+    const c = {...base};
+    if(donor){ c[donor] -= st; if(c[donor] < 1e-9) delete c[donor]; }
+    c[fid] = (c[fid]||0) + st;
+    if(sumCounts(c) > it.units + 1e-9) return null;
+    if(f.gi && !giFits(it, c)) return null;
+    return {c, donor};
+  };
+  if(sumCounts(base) + st <= it.units + 1e-9){ const r = attempt(null); if(r) return r; }
+  const donors = Object.entries(base).filter(([k,u])=>k!==fid && u >= st - 1e-9)
+    .sort((a,b)=> b[1]-a[1]);
+  for(const [k] of donors){ const r = attempt(k); if(r) return r; }
+  return null;
 }
-function renderSheet(){
+function sheetFocusKey(){
+  const a = document.activeElement; if(!a || !a.closest || !a.closest("#sheet-root")) return null;
+  for(const k of ["inc","dec","all","swapreset","swapsave","close"]) if(a.dataset && a.dataset[k]!==undefined) return `[data-${k}="${a.dataset[k]}"]`;
+  return null;
+}
+function renderSheet(opening){
   const root = $("#sheet-root");
-  if(!SW){ root.innerHTML=""; return; }
-  const {it, m} = findItem(SW.iid); const G = GROUPS[it.group];
-  const used = Object.values(SW.counts).reduce((a,b)=>a+b,0);
+  const r = SW && findItem(SW.iid);
+  if(!r){ SW = null; root.innerHTML = ""; document.querySelector(".wrap").inert = false; return; }
+  const fk = sheetFocusKey();
+  const inSheet = !!(document.activeElement && document.activeElement.closest && document.activeElement.closest("#sheet-root"));
+  const listTop = opening ? 0 : (root.querySelector(".sheet-b") || {}).scrollTop || 0;
+  const {it, m} = r; const G = GROUPS[it.group];
+  const used = sumCounts(SW.counts);
   const left = it.units - used;
+  const giOk = giSheetOk(it, SW.counts);
+  const balanced = Math.abs(left) < 1e-9;
   const segs = Math.max(it.units, used) / SW.step;
   let meter = ""; for(let i=0;i<segs;i++){ const v=(i+1)*SW.step; meter += `<i class="${v<=used+1e-9 ? (v>it.units+1e-9?"over":"on") : ""}"></i>`; }
-  const status = Math.abs(left)<1e-9 ? "Tamam, değişimler dengede." : left>0 ? `${fmtNum(left)} değişim daha seç.` : `${fmtNum(-left)} değişim fazla.`;
-  root.innerHTML = `<div class="scrim" data-close="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Değiştir" style="--c:${gcolor(it.group)}">
+  const status = !giOk ? `* meyveden günde en fazla ${GI_MAX} porsiyon. * meyveyi azalt.`
+    : balanced ? (SW.note || "Tamam, değişimler dengede. + ile başka besin seçersen en çok seçili olandan otomatik düşer.")
+    : left > 0 ? `${fmtNum(left)} değişim daha seç.` : `${fmtNum(-left)} değişim fazla.`;
+  const ML = mealLimitsOf(P(), m);
+  const lim = `Bu kalemde toplam ${fmtNum(it.units)} ${G.name.toLocaleLowerCase("tr")} değişimi sabit kalır.`
+    + (ML ? ` ${m.name} öğününde listedeki ${G.name.toLocaleLowerCase("tr")} limiti: ${fmtNum(ML[it.group])}.` : "")
+    + (G.foods.some(f=>f.gi) ? ` * işaretli meyveden günde en fazla ${GI_MAX} porsiyon.` : "");
+  root.innerHTML = `<div class="scrim" data-close="1"><div class="sheet${opening?" enter":""}" role="dialog" aria-modal="true" aria-label="Değiştir" tabindex="-1" style="--c:${gcolor(it.group)}">
     <div class="sheet-h"><span class="chip" style="--c:${gcolor(it.group)}">${esc(m.name)} · ${G.name}</span>
       <h3>${fmtNum(it.units)} ${G.long}</h3>
       <p>Bir besine dokun: hepsi onunla değişir. Ya da +/− ile birkaç besine böl.${it.orig?` Listede: ${esc(it.orig)}.`:""}</p>
       <div class="meter" aria-hidden="true">${meter}</div>
-      <p class="tnum" role="status">${status}</p>
-      <p class="hint">Limit: bu öğünde en fazla ${fmtNum(it.units)} değişim.${G.foods.some(f=>f.gi)?" * işaretli meyveden günde en fazla 1 porsiyon.":""}</p></div>
+      <p class="tnum" role="status">${esc(status)}</p>
+      <p class="hint">${esc(lim)}</p></div>
     <div class="sheet-b">${G.foods.map(f=>{
       const c = SW.counts[f.id]||0;
       return `<div class="opt ${c?"sel":""}"><div><button class="nm" data-all="${f.id}">${esc(f.name)}${f.gi?' <span style="color:var(--g-meyve)">*</span>':""}</button>
         <div class="sub tnum">1 değişim: ${esc(amount(f,1))}</div>
         ${c?`<div class="cur tnum">Seçili: ${esc(amount(f,c))}</div>`:""}</div>
-        <div class="step"><button data-dec="${f.id}" aria-label="${esc(f.name)} azalt" ${c?"":"disabled"}>−</button><output class="tnum">${fmtNum(c)}</output><button data-inc="${f.id}" aria-label="${esc(f.name)} artır" ${canInc(it,f,used)?"":"disabled"}>+</button></div></div>`;
+        <div class="step"><button data-dec="${f.id}" aria-label="${esc(f.name)} azalt" ${c?"":"disabled"}>−</button><output class="tnum">${fmtNum(c)}</output><button data-inc="${f.id}" aria-label="${esc(f.name)} artır" ${incPlan(it,f.id)?"":"disabled"}>+</button></div></div>`;
     }).join("")}</div>
     <div class="sheet-f"><button class="btn ghost" data-swapreset="1">Listedeki haline dön</button>
-      <div class="right"><button class="btn" data-close="1">Vazgeç</button><button class="btn primary" data-swapsave="1" ${Math.abs(left)<1e-9?"":"disabled"}>Kaydet</button></div></div>
+      <div class="right"><button class="btn" data-close="1">Vazgeç</button><button class="btn primary" data-swapsave="1" ${balanced&&giOk?"":"disabled"}>Kaydet</button></div></div>
   </div></div>`;
+  document.querySelector(".wrap").inert = true;
+  const list = root.querySelector(".sheet-b"); if(list) list.scrollTop = listTop;   // + / − sonrası liste başa kaçmasın
+  const target = (fk && root.querySelector(fk)) || (opening || inSheet || !fk ? root.querySelector(".sheet") : null);
+  if(target && !target.disabled) target.focus({preventScroll:true}); else root.querySelector(".sheet").focus({preventScroll:true});
 }
 function saveSwap(){
-  const {it} = findItem(SW.iid);
-  const sel = Object.entries(SW.counts).filter(([,u])=>u>0).map(([f,u])=>({f,u}));
-  const same = sel.length===it.def.length && sel.every(x=>it.def.some(d=>d.f===x.f && d.u===x.u));
+  const r = findItem(SW.iid); if(!r){ closeSwap(); return; }
+  const {it} = r;
+  const sel = Object.entries(SW.counts).filter(([,u])=>u>1e-9).map(([f,u])=>({f,u}));
+  if(Math.abs(sumCounts(SW.counts) - it.units) > 1e-9 || !sel.every(x=>FOOD[it.group+":"+x.f])){ toast("Değişimler dengede değil."); return; }
+  if(!giSheetOk(it, SW.counts)){ toast(`* meyveden günde en fazla ${GI_MAX} porsiyon.`); return; }
+  const same = sel.length===it.def.length && sel.every(x=>it.def.some(d=>d.f===x.f && Math.abs(d.u-x.u)<1e-9));
   it.sel = same ? null : sel;
-  SW = null; save(); renderSheet(); render(); toast("Değişim kaydedildi");
+  const opener = SW.opener; SW = null; renderSheet(); save(); render(); toast("Değişim kaydedildi");
+  document.querySelector(`[data-swap="${opener}"]`)?.focus();
+}
+
+/* ---------- diyetisyen listesini fotoğraftan / metinden okuma ----------
+   Fotoğraftaki yazı telefonda Tesseract (açık kaynak yazı tanıma) ile metne
+   çevrilir. Metin bu algoritmayla öğünlere ve değişim kalemlerine ayrılır:
+   1) Öğünler başlık (Sabah, Öğle...), saat aralığı ve ayırıcı çizgilerden bulunur;
+      başlık okunamadıysa saatten tahmin edilir.
+   2) Her satırda miktar + ölçü + besin aranır ("6 yemek kaşığı pilav"), "veya"dan
+      sonrası alternatif sayılır.
+   3) Besinin değişim tablosundaki 1 değişim ölçüsüyle bölünüp değişim sayısı
+      bulunur: pilav 1 değişim = 2 yk → 6 yk = 3 ekmek değişimi. Aralıklarda
+      ("6-8 yk") üst sınıra en yakın yarım değişim alınır.
+   4) Tanınmayan satırlar serbest kalem olur. Sonuç kaydetmeden önce gösterilir. */
+const trLow = x => String(x).toLocaleLowerCase("tr");
+const fold = x => trLow(x).replace(/ç/g,"c").replace(/ğ/g,"g").replace(/ı/g,"i").replace(/ö/g,"o").replace(/ş/g,"s").replace(/ü/g,"u").replace(/[âàá]/g,"a").replace(/[îíì]/g,"i").replace(/[ûúù]/g,"u");
+const P_FOODS = [
+  // [grup, besin, eşleşen ifadeler (küçük harf, Türkçe karaktersiz)]
+  ["et","kasar",["kasar peynir","kasar"]],["et","lightkasar",["light kasar"]],["et","lor",["lor peynir","lor"]],
+  ["et","cokelek",["cokelek"]],["et","beyaz",["beyaz peynir","peynir"]],["et","yumurta",["yumurta"]],
+  ["et","ton",["ton balik"]],["et","balik",["balik","somon","levrek","cipura","hamsi"]],["et","tavuk",["tavuk","hindi"]],
+  ["et","kiyma",["kiyma"]],["et","kusbasi",["kusbasi"]],["et","pirzola",["pirzola"]],["et","biftek",["biftek","bonfile"]],
+  ["et","kofte",["kofte","dana eti","kirmizi et","dana","et"]],
+  ["sut","yogurt",["yogurt"]],["sut","ayran",["ayran"]],["sut","kefir",["kefir"]],["sut","sut",["sut"]],
+  ["sebze","havucsuyu",["havuc suyu"]],["sebze","havuc",["havuc"]],["sebze","sebzeyemegi",["sebze yemegi","sebze yemekleri","sebze"]],
+  ["meyve","yesilerik",["yesil erik"]],["meyve","kirmizierik",["kirmizi erik"]],["meyve","murdum",["murdum","murdum erik"]],
+  ["meyve","kurukayisi",["kuru kayisi"]],["meyve","kuruuzum",["kuru uzum"]],["meyve","kuruincir",["kuru incir"]],["meyve","kuruerik",["kuru erik"]],
+  ["meyve","kayisi",["taze kayisi","kayisi"]],["meyve","incir",["taze incir","incir"]],["meyve","armut",["armut"]],
+  ["meyve","portakal",["portakal"]],["meyve","mandalina",["mandalina"]],["meyve","greyfurt",["greyfurt"]],["meyve","muz",["muz"]],
+  ["meyve","ayva",["ayva"]],["meyve","seftali",["seftali"]],["meyve","kiraz",["kiraz"]],["meyve","visne",["visne"]],
+  ["meyve","cilek",["cilek"]],["meyve","nar",["nar"]],["meyve","kivi",["kivi"]],["meyve","karpuz",["karpuz"]],["meyve","kavun",["kavun"]],
+  ["meyve","uzum",["uzum"]],["meyve","bogurtlen",["bogurtlen"]],["meyve","dut",["dut"]],["meyve","hurma",["hurma"]],
+  ["meyve","ananas",["ananas"]],["meyve","yenidunya",["yeni dunya"]],["meyve","avokado",["avokado","avakado"]],["meyve","elma",["elma","meyve"]],
+  ["ekmek","sandvic",["sandvic ekmek"]],["ekmek","hamburger",["hamburger ekmek"]],["ekmek","bazlama",["bazlama","bazlama ekmek"]],
+  ["ekmek","tam",["tam bugday","cavdar","kepekli ekmek","tam bugday ekmek","cavdar ekmek","ekmek"]],["ekmek","corba",["corba"]],
+  ["ekmek","pilav",["pilav","pirinc","bulgur"]],["ekmek","makarna",["makarna","eriste"]],
+  ["ekmek","bakliyat",["kuru baklagil","kurubaklagil","nohut","kuru fasulye","barbunya","mercimek"]],
+  ["ekmek","patates",["patates"]],["ekmek","patlamis",["patlamis misir"]],["ekmek","misir",["haslanmis misir","misir"]],
+  ["ekmek","leblebi",["leblebi"]],["ekmek","yufka",["yufka"]],["ekmek","etimek",["etimek","wasa"]],
+  ["ekmek","diyetbiskuvi",["diyet biskuvi","kepekli tuzlu diyet biskuvi"]],["ekmek","tatlibiskuvi",["tatli biskuvi"]],["ekmek","tuzlubiskuvi",["tuzlu biskuvi","biskuvi","kraker"]],
+  ["ekmek","galeta",["galeta"]],["ekmek","yulaf",["yulaf","yulaf ezme"]],["ekmek","grissini",["grissini"]],
+  ["yag","zeytinyagi",["zeytinyag","zeytin yag"]],["yag","zeytin",["zeytin"]],["yag","sivi",["sivi yag","bitkisel yag","aycicek yag"]],
+  ["yag","ceviz",["ceviz"]],["yag","findik",["findik"]],["yag","badem",["badem"]],["yag","zeytinyagi",["yag"]]
+];
+// Türkçe ek: ekmek → ekmeği, yoğurt → yoğurdu, çorba → çorbası, peynir → peyniri, yağ → yağı
+function phraseVariants(ph){
+  const words = ph.split(" "), last = words.pop(), pre = words.length ? words.join(" ") + " " : "";
+  const out = new Set([last]);
+  if(/[aeiou]$/.test(last)) ["si","su","yi","yu","lari","leri"].forEach(s=>out.add(last+s));
+  else {
+    const soft = last.replace(/k$/,"g").replace(/t$/,"d").replace(/p$/,"b").replace(/c$/,"c");
+    ["i","u","a","e","lar","ler","lari","leri"].forEach(s=>{ out.add(last+s); if(soft!==last && !/^l/.test(s)) out.add(soft+s); });
+  }
+  return [...out].map(w=>pre+w);
+}
+const P_FOOD_RE = P_FOODS.flatMap(([g,id,phs])=>phs.map(ph=>({g, id, ph,
+  re: new RegExp("(^|[^a-z])(" + phraseVariants(ph).map(v=>v.replace(/ /g,"\\s+")).join("|") + ")(?=$|[^a-z])", "g")})));
+// 1 değişimin tabloda yazmayan ama listelerde sık geçen karşılıkları (tablodaki notlar ve eşdeğer ölçüler)
+const P_EQUIV = {
+  "sut:yogurt": {"su bardagi":1, "kase":1, "g":200, "ml":200},
+  "sut:sut": {"g":200}, "sut:kefir": {"g":200}, "sut:ayran": {"g":400},
+  "yag:zeytinyagi": {"ml":5}, "yag:sivi": {"ml":5}
+};
+// ölçüler: miktarın hemen arkasında aranır
+const P_UNITS = [
+  ["yemek kasigi",/^\s*\(?\s*(yemek\s+kasig[ia]|yemek\s+kasik|yemek\s+k\b\.?|y\.\s?k\b\.?|yk\b)/],
+  ["tatli kasigi",/^\s*\(?\s*(tatli\s+kasig[ia]|tatli\s+kasik|t\.\s?k\b\.?|tk\b)/],
+  ["cay kasigi",/^\s*\(?\s*(cay\s+kasig[ia]|cay\s+kasik)/],
+  ["cay bardagi",/^\s*\(?\s*(cay\s+bardag[ia]|cay\s+bardak)/],
+  ["su bardagi",/^\s*\(?\s*(su\s+bardag[ia]|subardag[ia]|su\s+bardak|s\.\s?b\b\.?|sb\b|bardak\b)/],
+  ["ince dilim",/^\s*\(?\s*ince\s+dilim/],["dilim",/^\s*\(?\s*dilim/],
+  ["kofte kadar",/^\s*\(?\s*kofte\s+(kadar|buyuklugu(nde)?)/],["kibrit kutusu",/^\s*\(?\s*kibrit\s+kutusu(\s+kadar)?/],
+  ["kase",/^\s*\(?\s*(orta\s+|kucuk\s+|buyuk\s+)?(kase|kepce)/],["porsiyon",/^\s*\(?\s*(porsiyon|degisim)/],
+  ["boy",/^\s*\(?\s*(kucuk|orta|buyuk)(\s+boy)?\b/],["adet",/^\s*\(?\s*(adet|tane)\b/],["avuc",/^\s*\(?\s*avuc/],
+  ["g",/^\s*(g|gr|gram)\b\.?/],["ml",/^\s*(ml|cc)\b\.?/]
+];
+const P_FREE = /\b(cay|ihlamur|bitki cayi|salata|domates|salatalik|yesillik|marul|roka|maydanoz|biber|tursu|cacik|mevsim|limon|maden suyu|kahve|su)\b(?!\s+(bardag|kasig))/;
+const P_MEALS = [
+  [/^(sabah|kahvalti)/,"Sabah"],[/^(ara\s+ogun|kusluk)/,"Ara öğün"],[/^(ogle|oglen)/,"Öğle"],[/^ikindi/,"İkindi"],
+  [/^aksam/,"Akşam"],[/^(gece|yatmadan|yatarken)/,"Gece"]
+];
+const P_WORDNUM = {"yarim":.5,"ceyrek":.25,"bir":1,"iki":2,"uc":3,"dort":4,"bes":5,"alti":6,"yedi":7,"sekiz":8,"dokuz":9,"on":10};
+const halfRound = x => Math.max(.5, Math.round(x*2)/2);
+const halfFloor = x => Math.floor(x*2+1e-9)/2;
+
+function pNum(x){ x = String(x).replace(/\s/g,""); if(x==="½") return .5; if(x==="¼") return .25; if(x==="¾") return .75;
+  if(x.includes("/")){ const [a,b] = x.split("/").map(Number); return b ? a/b : NaN; } return parseFloat(x.replace(",", ".")); }
+// satırdaki bütün miktarlar: 6-8, 1/2, ½, 1 ½, 1 buçuk, yarım, iki ...
+function pQtys(t){
+  const out = [], re = /(\d+(?:[.,]\d+)?)\s*(?:bucuk|½|1\/2)(?!\d)|(\d+(?:[.,]\d+)?(?:\s*\/\s*\d+)?|[½¼¾])(?:\s*[-–—]\s*(\d+(?:[.,]\d+)?(?:\s*\/\s*\d+)?))?|\b(bir|iki|uc|dort|bes|alti)\s+bucuk\b|\b(yarim|ceyrek|bir|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on)\b/g;
+  let m;
+  while((m = re.exec(t))){
+    let lo, hi;
+    if(m[1]!==undefined){ lo = hi = pNum(m[1]) + .5; }
+    else if(m[2]!==undefined){ lo = pNum(m[2]); hi = m[3]!==undefined ? pNum(m[3]) : lo; }
+    else if(m[4]!==undefined){ lo = hi = P_WORDNUM[m[4]] + .5; }
+    else { lo = hi = P_WORDNUM[m[5]]; }
+    if(!(lo > 0)) continue;
+    out.push({lo, hi: hi > lo ? hi : lo, start: m.index, end: m.index + m[0].length, word: m[5]!==undefined});
+  }
+  return out;
+}
+function pUnitAt(t, pos){ const rest = t.slice(pos); for(const [u,re] of P_UNITS){ const m = re.exec(rest); if(m) return {u, start: pos, end: pos + m[0].length, size: (/(kucuk|orta|buyuk)/.exec(m[0])||[])[1]}; } return null; }
+// besin: "/" ile ayrılmış ilk seçenekteki tamlamanın ana ismi (en sonda biten eşleşme)
+function pFindFood(t){
+  const parts = t.split(/(?<!\d)\s*\/\s*(?!\d)/);
+  for(const part of parts){
+    let best = null;
+    for(const e of P_FOOD_RE){ e.re.lastIndex = 0; let m;
+      while((m = e.re.exec(part))){ const at = m.index + m[1].length, end = at + m[2].length;
+        if(!best || end > best.end || (end===best.end && m[2].length > best.len)) best = {g:e.g, id:e.id, ph:e.ph, at, end, len:m[2].length}; } }
+    if(best) return best;
+  }
+  return null;
+}
+function pUnitsFor(g, id, q, unit){
+  // miktar, değişim tablosundaki 1 değişim ölçüsüne bölünür; dönen {u, sure}
+  const f = FOOD[g+":"+id], fu = fold(f.u), n = Array.isArray(f.n) ? (f.n[0]+f.n[1])/2 : f.n, eq = P_EQUIV[g+":"+id] || {};
+  const u = unit && unit.u;
+  if(u==="porsiyon") return {u:q, sure:true};
+  if(u && eq[u]) return {u:q/eq[u], sure:true};
+  if(u==="g") return f.g ? {u:q/f.g, sure:true} : {u:1, sure:false};
+  if(u==="ml") return f.ml ? {u:q/f.ml, sure:true} : {u:1, sure:false};
+  if(u==="kofte kadar" && g==="et") return {u:q, sure:true};           // köfte kadar et = 1 değişim
+  if((u==="dilim"||u==="ince dilim") && ["beyaz","kasar","lightkasar"].includes(id)) return {u:q, sure:true}; // 1 dilim peynir ≈ 1 kibrit kutusu
+  const countish = /adet|boy|buyuklu|kadar|parca|dilim/.test(fu);
+  if(!u) return {u:q/n, sure: countish && !/dilim/.test(fu)};
+  if(u==="boy"){ const fs = (/(kucuk|orta|buyuk)/.exec(fu)||[])[1]; return {u:q/n, sure: /adet|boy/.test(fu) && (!fs || !unit.size || fs===unit.size)}; }
+  const same = fu.includes(u) || ((u==="dilim"||u==="ince dilim") && fu.includes("dilim")) || (u==="adet" && /adet|boy|buyuklu|kadar/.test(fu))
+    || (u==="kibrit kutusu" && fu.includes("kibrit")) || (u==="kase" && fu.includes("kase"));
+  return {u:q/n, sure: !!same};
+}
+function pTidy(x){
+  // BÜYÜK HARF kelimeleri Türkçe kurala göre küçült, baştaki/sondaki okuma çöpünü at
+  x = x.replace(/(^|\s)\|(?=\s+[A-Za-zÇĞİÖŞÜçğıöşü])/g,"$11").replace(/[|_~«»“”"=]+/g," ").replace(/\s+/g," ").trim();
+  x = x.replace(/(?<![\p{L}])\p{Lu}{2,}(?![\p{L}])/gu, w=>trLow(w));
+  x = x.replace(/^[A-Za-zÇĞİÖŞÜçğıöşü]\s+(?=\d)/,"").replace(/^[^\p{L}\d(½¼¾]+/u,"").replace(/\s+[A-Za-zçğıöşü]$/,"").trim();
+  return x ? x.charAt(0).toLocaleUpperCase("tr") + x.slice(1) : x;
+}
+// tek bir "miktar ölçü besin" parçası
+function pOne(seg, whole){
+  seg = seg.replace(/\btablo\s*\d+[^\s)]*/g, m=>" ".repeat(m.length));
+  const paren = []; seg.replace(/\([^)]*\)/g, (m, at)=>{ paren.push([at, at+m.length]); return m; });
+  const inParen = x => paren.some(([a,b])=>x.start > a && x.start < b);
+  const q = pQtys(seg).filter(x=>!inParen(x) || pUnitAt(seg, x.end));
+  const pairs = q.map(x=>({q:x, unit:pUnitAt(seg, x.end)}));
+  let body = seg; pairs.forEach(p=>{ if(p.unit) body = body.slice(0,p.unit.start) + " ".repeat(p.unit.end-p.unit.start) + body.slice(p.unit.end); });
+  body = body.replace(/\([^)]*\)/g, m=>" ".repeat(m.length));
+  let food = pFindFood(body);
+  return {q, pairs, food};
+}
+function pItemFrom(seg, whole, text){
+  let {pairs, food} = pOne(seg, whole);
+  if(!food && whole){   // ilk seçenek okunamadı ("yoğur!"): okunabilen ilk seçeneği kullan
+    for(const alt of whole.split(/\s+(?:veya|ya da|yada)\s+/).slice(1)){ const o = pOne(alt); if(o.food){ ({pairs, food} = o); seg = alt; break; } }
+  }
+  const f = fold(seg);
+  const freeish = P_FREE.test(f.replace(/\([^)]*\)/g," "));
+  if(!food || (freeish && food.ph.length<=3)) return {kind:"free", text, orig:text};
+  // "Pilav veya makarna 6 yemek kaşığı": miktar seçeneklerden sonra yazılmış olabilir
+  let use = pairs;
+  if(!use.length && whole){ use = pOne(whole).pairs; }
+  if(!use.length) return {kind:"free", text, orig:text, check:true};   // miktarsız besin: değişim uydurma
+  // besinle uyumlu ölçüsü olan ilk miktar; yoksa ölçüsü olan ilk; yoksa ilk
+  const scored = use.map(p=>({p, r:pUnitsFor(food.g, food.id, p.q.lo, p.unit)}));
+  const pick = scored.find(x=>x.p.unit && x.r.sure) || scored.find(x=>x.p.unit && !x.p.q.word) || scored.find(x=>x.p.unit) || scored[0];
+  const a = pick.r, b = pUnitsFor(food.g, food.id, pick.p.q.hi, pick.p.unit), q = pick.p.q;
+  let units = q.hi > q.lo ? (halfFloor(b.u) >= a.u - 1e-9 ? halfFloor(b.u) : halfRound((a.u+b.u)/2)) : halfRound(a.u);
+  let sure = a.sure && b.sure && (q.hi > q.lo || Math.abs(units - a.u) < .15);
+  if(units > 12){ units = 12; sure = false; }   // mantıksız büyük sayı: okuma hatası, kontrol ettir
+  return {kind:"ex", group:food.g, food:food.id, units, orig:text, check:!sure};
+}
+function pItems(raw){
+  const text = pTidy(raw);
+  const t = fold(text).replace(/(^|\s)[|!l](?=\s+[a-z])/g,"$11");   // "| su bardağı" → "1 su bardağı"
+  const main = t.split(/\s+(?:veya|ya da|yada)\s+/)[0];
+  // "2 dilim peynir + 5 adet zeytin": ikinci miktarla başlayan parça ayrı kalem
+  const parts = main.split(/\s*(?:\+|\bile\b|\bve\b|,|;)\s*(?=(?:\d|[½¼¾]|yarim\b|ceyrek\b|bir\b|iki\b|uc\b|dort\b|bes\b|alti\b))/);
+  if(parts.length > 1){
+    const raws = text.split(/\s*(?:\+|\bile\b|\bve\b|,|;)\s*(?=(?:\d|[½¼¾]|[Yy]arım\b|[Çç]eyrek\b|[Bb]ir\b|[İi]ki\b|[Üü]ç\b|[Dd]ört\b|[Bb]eş\b|[Aa]ltı\b))/);
+    return parts.map((p,i)=>pItemFrom(p, i===0 ? t : null, pTidy(raws[i] || p)));
+  }
+  return [pItemFrom(main, t, text)];
+}
+// okuma çöpü: 3+ harfli kelime yok ("e 1) EZ Ee") ya da kısa büyük harfli anlamsız parçalar ("KERE 0 GN CM")
+function pIsNoise(x){
+  const f = fold(x);
+  if(pQtys(f).length && pFindFood(f)) return false;
+  if(P_MEALS.some(([re])=>re.test(f.replace(/^\d+\s*[.)-]?\s*/,""))) || /\d{1,2}[.:,]\d{2}/.test(x)) return false;
+  const words = x.match(/[\p{L}]+/gu) || [];
+  if(!words.some(w=>w.length>=3)) return true;
+  if(pFindFood(f) || P_FREE.test(f)) return false;
+  return !/\p{Ll}{3,}/u.test(x) && words.every(w=>w.length<=4) && words.some(w=>w.length<=2);
+}
+const SEP_LEAD = /^\s*(?:[—_=~*•·-]\s*){2,}/, SEP_TRAIL = /(?:\s*[—_=~*•·-]){2,}\s*$/;
+const P_TIME = [
+  // [düzenli ifade, [başSaat, başDk, bitSaat, bitDk] grupları]
+  /(\d{1,2})[.:,](\d{2})\s*[-–—]\s*(\d{1,2})[.:,](\d{2})/,
+  /(?:^|[^\d])[.:,](\d{2})\s*[-–—]\s*(\d{1,2})[.:,](\d{2})/,          // baş saati okunamamış: ".00-21.30"
+  /\b([01]\d|2[0-3])([0-5]\d)\s*[-–—:]\s*([01]\d|2[0-3])([0-5]\d)\b/    // noktasız: "1700-1730", "2100:2130"
+];
+function pTime(line){
+  let x = line.replace(/(^|[\s(\-–—])[lI|](\d[.:,]\d{2})/g,"$11$2").replace(/(\d)[lI|]([.:,]\d{2})/g,"$11$2").replace(/(\d[.:,]\d)[oO]/g,"$10");
+  for(let k=0;k<P_TIME.length;k++){
+    const m = P_TIME[k].exec(x); if(!m) continue;
+    let h1, m1, h2, m2;
+    if(k===1){ h2 = +m[2]; m2 = +m[3]; const e = h2*60 + m2 - 30; h1 = Math.floor((e+1440)%1440/60); m1 = (e+1440)%60; }   // pencere 30 dk sayılır
+    else { h1 = +m[1]; m1 = +m[2]; h2 = +m[3]; m2 = +m[4]; }
+    const at = m.index + (k===1 && !/^[.:,]/.test(m[0]) ? 1 : 0);
+    const rest = (x.slice(0, at) + " " + x.slice(m.index + m[0].length)).trim();
+    if(h1>23 || h2>23 || m1>59 || m2>59) return {time:"", rest:line, bad:false};
+    const d = (h2*60+m2) - (h1*60+m1);
+    if(d <= 0 || d > 180) return {time:"", rest, bad:true};   // öğün aralığı değil (mesai saati vb.)
+    const p = n => String(n).padStart(2,"0");
+    return {time:`${p(h1)}.${p(m1)} – ${p(h2)}.${p(m2)}`, rest, bad:false};
+  }
+  return {time:"", rest:line, bad:false};
+}
+function pHeader(line){
+  // "1. ARA ÖĞÜN", "Öğle yemeği", "l AKŞAM", "Yatmadan önce"
+  const lead = /^\s*(?:[lIj|!]\s+)?(?:(\d+)\s*[.)-]?\s*)?/.exec(line);
+  const rest = line.slice(lead[0].length), f = fold(rest);
+  for(const [re, name] of P_MEALS){
+    const m = re.exec(f); if(!m) continue;
+    let len = m[0].length;
+    const tail = /^(?:u|i|leri)?(?:\s+(?:yemegi|yemek|kahvaltisi|ogunu|ogun|once|oncesi))?(?![a-z])/.exec(f.slice(len));
+    if(!tail) continue;
+    len += tail[0].length;
+    return {name: (lead[1] && name==="Ara öğün" ? lead[1] + ". " : "") + name, rest: rest.slice(len).replace(/^[\s:.,-]+/,"")};
+  }
+  return null;
+}
+const P_ADVICE = /\b[a-z]*(iniz|yiniz|meyin|mayin|unuz|yunuz)\b/;
+const P_END = /^(tablo\s*\d|yenilmemesi|oneriler|degisim (listesi|tablosu)|meyvelerin \d)/;
+function parseDietText(text){
+  const meals = []; let cur = null, started = false, pendingTime = "", pre = [], prevAlt = false;
+  const open = () => { cur = {name:"", time:"", timeFirst:false, items:[], spor:false}; meals.push(cur); return cur; };
+  const setTime = t => { if(!cur) open(); cur.time = t; cur.timeFirst = !cur.items.length; };
+  for(const raw of String(text||"").split(/\r?\n/)){
+    let line = raw.trim(); if(!line) continue;
+    if(/^=+\s*foto/i.test(line)){ cur = null; started = false; pendingTime = ""; pre = []; continue; }   // çok fotoğrafta her sayfa ayrı okunur
+    // ayırıcı çizgi kalıntıları: "EE 2 Porsiyon", "1 Adet Yumurta — —", "_ _ _"
+    let closeAfter = false;
+    const lead = /^([A-Za-zÇĞİÖŞÜçğıöşü])\1+(?=[\s\d]|$)/i.exec(line) || SEP_LEAD.exec(line);
+    if(lead){ line = line.slice(lead[0].length).trim(); if(started) cur = null; }
+    const trail = SEP_TRAIL.exec(line); if(trail && !/\d\s*$/.test(line.slice(0, trail.index + 1))) line = line.slice(0, trail.index).trim();   // satır sonundaki çizgi kalıntısı öğünü bitirmez
+    if(!line){ if(started) cur = null; continue; }
+    const wasAlt = prevAlt; prevAlt = /\b(veya|ya da|yada)\s*$/i.test(line);
+    if(started && P_END.test(fold(line))) break;   // listenin bittiği yer: tablolar, öneriler
+    const noParen = fold(line).replace(/\([^)]*\)/g," ");
+    if(P_ADVICE.test(noParen) && !/^\s*\d/.test(noParen)){ continue; }   // öneri/uyarı cümlesi
+    // saat, sonra başlık (saat başlığın önünde ya da arkasında olabilir)
+    const tm = pTime(line); let time = tm.time; line = tm.rest;
+    if(tm.bad && !started) continue;
+    if(!time && pIsNoise(line)){ if(!started) pre = []; else if(lead || /[A-ZÇĞİÖŞÜ]{2,}/.test(line)) cur = null; continue; }
+    if(/^[|!li]\s*(adet|dilim|ince|su|yemek|tatl|cay|porsiyon|kase|kepce|orta|kucuk|buyuk|kofte)\b/.test(fold(line))) line = line.replace(/^[|!lIİı]\s*/, "1 ");
+    line = line.replace(/^[^\p{L}\d(½¼¾]+/u, "");
+    const hdr = pHeader(line);
+    if(hdr) line = hdr.rest;
+    if(!started){
+      if(hdr || time){ started = true; }
+      else {
+        // başlıktan hemen önce basılmış kalem satırı (sütunlu düzen): en fazla 2 satır tutulur
+        const its = (line.match(/\p{L}/gu)||[]).length >= 3 ? pItems(line) : [];
+        pre = its.length && its.every(it=>it.kind==="ex" && !it.check) ? pre.concat(its).slice(-2) : [];
+        continue;
+      }
+    }
+    if(wasAlt && !hdr && !time) continue;                         // önceki satırın "veya"sından sonraki seçenek
+    if(/^(veya|ya da|yada)\b/i.test(fold(line)) && !hdr){ continue; }
+    if(hdr){
+      if(!cur || cur.name || (cur.time && cur.timeFirst && cur.items.length)) open();
+      cur.name = hdr.name;
+      if(pendingTime && !time){ cur.time = pendingTime; cur.timeFirst = true; }
+      pendingTime = "";
+      if(pre.length){ cur.items.push(...pre); pre = []; }
+    }
+    if(time){
+      const f = fold(line);
+      const alone = !hdr && (f.match(/[a-z]/g)||[]).length < 3;
+      if(hdr){ if(!cur.time){ cur.time = time; cur.timeFirst = !cur.items.length; } }
+      else if(alone && cur && cur.items.length && cur.time){ pendingTime = time; continue; }   // saati olan öğünden sonra gelen tek saat: bir sonraki başlığın
+      else if(!cur || (cur.time && cur.time!==time)) { open(); setTime(time); }
+      else if(!cur.time) setTime(time);
+    }
+    if(pendingTime && !hdr){ if(!cur || cur.time) open(); setTime(pendingTime); pendingTime = ""; }
+    if(pre.length){ (cur||open()).items.push(...pre); pre = []; }
+    let f = fold(line);
+    if(/\bspor\s+sonrasi\b/.test(f)){ (cur||open()).spor = true; line = line.replace(/spor\s+sonras[ıi]/i,"").trim(); f = fold(line); }
+    if((line.match(/\p{L}/gu)||[]).length >= 3){
+      const c = cur || open(), prev = c.items[c.items.length-1];
+      if(prev && !pQtys(f).length){ const ws = f.match(/[a-z]{3,}/g)||[], pw = fold(prev.orig||prev.text||"");
+        if(ws.length && ws.filter(x=>pw.includes(x)).length / ws.length >= .6) continue; }   // bir önceki satırın okuma tekrarı
+      c.items.push(...pItems(line));
+    }
+    if(closeAfter) cur = null;
+  }
+  if(pendingTime && cur && !cur.time) cur.time = pendingTime;
+  const nameFromTime = t => { const h = parseInt(t,10); return isNaN(h) ? "" : h < 11 ? "Sabah" : h < 16 ? "Öğle" : h < 20 ? "Akşam" : "Gece"; };
+  return meals.filter(m=>m.items.length).map((m,i)=>({
+    name: (m.name || nameFromTime(m.time) || `Öğün ${i+1}`) + (m.spor ? " · spor sonrası" : ""),
+    time: m.time, items: m.items
+  }));
+}
+
+/* ---------- içe aktarma ekranı ---------- */
+let IMP = null; // {phase:"ocr"|"review"|"text", progress, msg, text, meals}
+let tessLoading = null;
+function loadTesseract(){
+  if(window.Tesseract) return Promise.resolve();
+  if(!tessLoading) tessLoading = new Promise((res, rej)=>{ const sc = document.createElement("script");
+    sc.src = "https://cdn.jsdelivr.net/npm/tesseract.js@7.0.0/dist/tesseract.min.js";
+    sc.onload = res; sc.onerror = ()=>{ tessLoading = null; rej(new Error("yuklenemedi")); }; document.head.appendChild(sc); });
+  return tessLoading;
+}
+function parseScore(meals){
+  // doğruluk bilinmeden kıyas: saatli/adlı öğün ve tabloyla eşleşen kalem artı, işaretli kalem eksi
+  let sc = 0;
+  meals.forEach(m=>{ if(m.time) sc += 2; if(!/^Öğün \d/.test(m.name)) sc += 1;
+    m.items.forEach(it=>{ sc += it.kind==="ex" ? (it.check ? .5 : 2) : (it.check ? -1 : .3); }); });
+  return sc;
+}
+async function prepImage(file, stretch){
+  // küçült + gri tonlama (+ kontrast): telefon fotoğrafında okumayı iyileştirir
+  const url = URL.createObjectURL(file);
+  try{
+    const img = new Image(); await new Promise((r,j)=>{ img.onload=r; img.onerror=j; img.src=url; });
+    const sc = Math.min(1, 2400 / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement("canvas"); c.width = Math.round(img.naturalWidth*sc); c.height = Math.round(img.naturalHeight*sc);
+    const x = c.getContext("2d"); x.drawImage(img, 0, 0, c.width, c.height);
+    const d = x.getImageData(0, 0, c.width, c.height), px = d.data;
+    let lo = 255, hi = 0; for(let i=0;i<px.length;i+=4){ const v = .299*px[i]+.587*px[i+1]+.114*px[i+2]; px[i]=v; if(v<lo) lo=v; if(v>hi) hi=v; }
+    const k = stretch ? 255 / Math.max(1, hi-lo) : 1, o = stretch ? lo : 0;
+    for(let i=0;i<px.length;i+=4){ const v = (px[i]-o)*k; px[i]=px[i+1]=px[i+2]=v; }
+    x.putImageData(d, 0, 0); return c;
+  } finally { URL.revokeObjectURL(url); }
+}
+function impProgress(){ const el = $("#impprog"); if(el && IMP){ el.value = IMP.progress||0; } const m = $("#impmsg"); if(m && IMP) m.textContent = IMP.msg||""; }
+async function runImport(files){
+  IMP = {phase:"ocr", progress:0, msg:"Yazı tanıma yükleniyor…", text:"", meals:[]}; TAB = TAB==="edit" ? "edit" : "menu"; render();
+  let w = null;
+  try{
+    await loadTesseract();
+    const n = files.length; let i = 0;
+    let pass = 0;
+    w = await Tesseract.createWorker("tur", 1, {logger: m=>{ if(!IMP) return; if(m.status==="recognizing text"){ IMP.progress = (i + (pass + m.progress)/2)/n; IMP.msg = `Okunuyor${n>1?` (${i+1}/${n})`:""}…`; } else if(/load/.test(m.status||"")) IMP.msg = "Türkçe dil dosyası yükleniyor…"; impProgress(); }});
+    let text = "";
+    for(; i<n; i++){
+      // aynı fotoğraf iki ayarla okunur, algoritmanın daha tutarlı bulduğu metin seçilir
+      let best = null;
+      for(pass=0; pass<2; pass++){ const c = await prepImage(files[i], pass===1); const {data} = await w.recognize(c);
+        const sc = parseScore(parseDietText(data.text)); if(!best || sc > best.sc) best = {sc, t:data.text}; }
+      text += (n > 1 ? `=== FOTOĞRAF ${i+1} ===\n` : "") + best.t + "\n";
+    }
+    if(!IMP) return;
+    IMP.text = text; IMP.meals = parseDietText(text); IMP.phase = "review";
+  }catch(e){ if(IMP){ IMP.phase = "text"; IMP.err = "Fotoğraf okunamadı. İnternet bağlantını kontrol et ya da listenin metnini aşağıya yapıştır."; } }
+  finally{ if(w) w.terminate().catch(()=>{}); }
+  render();
+}
+const IMP_UNITS = [.5,1,1.5,2,2.5,3,3.5,4,5,6,7,8,9,10,12];
+function viewImport(){
+  if(IMP.phase==="ocr") return `<div class="card auth"><h2>Liste okunuyor</h2><p class="hint" id="impmsg">${esc(IMP.msg||"")}</p>
+    <progress id="impprog" max="1" value="${IMP.progress||0}" style="width:100%"></progress>
+    <p class="hint">İlk seferde Türkçe dil dosyası indirildiği için biraz sürebilir.</p><div class="row"><button class="btn" data-imp="cancel">Vazgeç</button></div></div>`;
+  const textBox = `<div class="field"><label for="imptext">Listenin metni</label><textarea id="imptext" rows="10" placeholder="SABAH 10.30-11.00&#10;2 dilim peynir&#10;1 adet yumurta&#10;...">${esc(IMP.text||"")}</textarea></div>
+    <div class="row"><button class="btn" data-imp="parse">Metinden oku</button><button class="btn ghost" data-imp="start">Fotoğraf seç</button></div>`;
+  if(IMP.phase==="text") return `<div class="card"><h2>Diyetisyen listesi</h2>${IMP.err?`<p class="alert">${esc(IMP.err)}</p>`:""}
+    <p class="hint">Listenin metnini yapıştır ya da yaz: her öğün başlığı (Sabah, Öğle, Akşam, Gece) ve saatiyle, altında her satırda bir yiyecek.</p>
+    ${textBox}<div class="row"><button class="btn ghost" data-imp="cancel">Vazgeç</button></div></div>`;
+  const gopts = sel => GKEYS.map(k=>`<option value="${k}" ${k===sel?"selected":""}>${GROUPS[k].name}</option>`).join("") + `<option value="free" ${sel==="free"?"selected":""}>Serbest</option>`;
+  const uopts = u => [...new Set([...IMP_UNITS, u])].sort((a,b)=>a-b).map(n=>`<option value="${n}" ${n===u?"selected":""}>× ${fmtNum(n)}</option>`).join("");
+  const checks = IMP.meals.reduce((a,m)=>a+m.items.filter(it=>it.check).length,0);
+  const giImp = IMP.meals.reduce((a,m)=>a+m.items.reduce((b,it)=>b+(it.kind==="ex" && FOOD[it.group+":"+it.food]?.gi ? it.units : 0),0),0);
+  let h = `<div class="form"><div class="card"><h2>Okunan liste</h2>
+    <p class="hint">Fotoğraftan çıkarılan öğünler ve değişim sayıları. Yanlış okunanı düzelt, sonra kaydet. Kaydedilen liste limitin olur; değişimler bu sayılarla yapılır.</p>
+    ${checks?`<p class="alert">${checks} kalem tabloyla tam eşleşmedi, sarı işaretli. Kontrol et.</p>`:""}
+    ${giImp > GI_MAX + 1e-9 ? `<p class="alert">Listede * işaretli meyve toplam ${fmtNum(giImp)} porsiyon; kurala göre günde en fazla ${GI_MAX}. Birini başka meyveyle değiştir.</p>`:""}
+    ${IMP.meals.length?"":`<p class="alert">Listede öğün bulunamadı. Metni kontrol edip “Metinden oku”ya bas.</p>`}</div>`;
+  IMP.meals.forEach((m,mi)=>{
+    h += `<section class="meal"><div class="emeal-h"><input type="text" id="imn-${mi}" data-impmeal="${mi}" value="${esc(m.name)}" aria-label="Öğün adı"><input type="text" id="imt-${mi}" data-imptime="${mi}" value="${esc(m.time)}" placeholder="Saat" aria-label="Saat"></div>`;
+    m.items.forEach((it,ii)=>{
+      const k = mi+"-"+ii;
+      h += `<div class="improw ${it.check?"check":""}"><div class="impc">
+        <select id="ig-${k}" data-impg="${k}" aria-label="Grup">${gopts(it.kind==="free"?"free":it.group)}</select>
+        ${it.kind==="free" ? `<input type="text" id="itx-${k}" data-imptx="${k}" value="${esc(it.text)}" aria-label="Metin">`
+          : `<select id="iu-${k}" data-impu="${k}" aria-label="Değişim">${uopts(it.units)}</select>
+             <select id="if-${k}" data-impf="${k}" aria-label="Besin">${GROUPS[it.group].foods.map(f=>`<option value="${f.id}" ${f.id===it.food?"selected":""}>${esc(f.name)}</option>`).join("")}</select>`}
+        <button class="btn ghost danger" data-impdel="${k}" aria-label="Kalemi çıkar">Çıkar</button></div>
+        <div class="hint">Listede: ${esc(it.orig)}${it.kind==="ex"?` → ${esc(amount(FOOD[it.group+":"+it.food], it.units))}`:""}</div></div>`;
+    });
+    h += `</section>`;
+  });
+  h += `<details class="card"><summary>Okunan metni gör / düzelt</summary>${textBox}</details>
+    <div class="row"><button class="btn primary" data-imp="save" ${IMP.meals.some(m=>m.items.some(it=>it.kind==="ex"))?"":"disabled"}>${confirmKey==="imp"?"Emin misin? Mevcut listenin yerine geçer":"Listeyi kaydet"}</button><button class="btn ghost" data-imp="cancel">Vazgeç</button></div></div>`;
+  return h;
+}
+function cloneMeals(meals){
+  return JSON.parse(JSON.stringify(meals)).map(m=>({...m, id:nid("m"), items:m.items.map(it=>({...it, id:nid(), sel:null}))}));
+}
+function saveImport(){
+  const meals = IMP.meals.filter(m=>m.items.length).map((m,i)=>({id:nid("m"), key:"m"+(i+1), name:m.name.trim()||`Öğün ${i+1}`, time:m.time.trim(),
+    items:m.items.map(it=> it.kind==="free" ? fr(it.text) : ex(it.group, it.units, it.food, it.orig))}));
+  if(!ME) ME = {name:(USER.email||"").split("@")[0] || "Profilim", meals:[], log:{}};
+  ME.diet = {meals: JSON.parse(JSON.stringify(meals)), at: Date.now()};
+  ME.meals = cloneMeals(meals);
+  delete ME.plan;
+  IMP = null; confirmKey = null; migrateProfile(ME); save(); TAB = "menu"; render(); toast("Diyetisyen listesi kaydedildi");
 }
 
 /* ---------- events ---------- */
@@ -643,37 +1296,96 @@ document.addEventListener("click", e=>{
   const b = e.target.closest("button, .scrim"); if(!b) return;
   const d = b.dataset;
   if(b.classList.contains("scrim") && e.target!==b) return;
-  if(d.close){ SW=null; renderSheet(); return; }
-  if(d.profile){ S.active=d.profile; confirmKey=null; save(); render(); return; }
+  if(d.close){ closeSwap(); return; }
+  if(d.imp){
+    if(d.imp==="start"){ const fi=$("#impfile"); fi.value=""; fi.click(); return; }
+    if(d.imp==="text"){ IMP = {phase:"text", text:"", meals:[]}; render(); return; }
+    if(d.imp==="cancel"){ IMP = null; confirmKey = null; render(); return; }
+    if(d.imp==="parse"){ const t = ($("#imptext")||{}).value||""; IMP = {phase:"review", text:t, meals:parseDietText(t)}; confirmKey=null; render(); return; }
+    if(d.imp==="save"){
+      if(ME && ME.meals.length && confirmKey!=="imp"){ confirmKey="imp"; render(); return; }
+      if(ME){ saveImport(); return; }
+      // ilk giriş: başka cihazda liste oluşturulduysa önce onu göster
+      const u = USER;
+      fsdb.collection("users").doc(u.uid).get().then(snap=>{
+        if(USER!==u) return;
+        const remote = snap.exists ? readProfile((snap.data()||{}).json) : null;
+        if(remote){ ME = remote; migrateProfile(ME); confirmKey="imp"; render(); toast("Bu hesapta zaten bir liste var. Yine de kaydedersen yerine geçer."); return; }
+        saveImport();
+      }).catch(()=>{ if(USER===u) toast("Bağlanılamadı. İnternet bağlantını kontrol et."); });
+      return;
+    }
+    return;
+  }
+  if(d.impdel){ const [mi,ii]=d.impdel.split("-").map(Number); IMP.meals[mi].items.splice(ii,1); render(); return; }
+  if(d.authmode){ AUTH_EMAIL = ($("#aemail")||{}).value || AUTH_EMAIL; AUTH_MODE=d.authmode; render(); return; }
+  if(d.onboard){
+    const nm = (($("#oname")||{}).value||"").trim(), u = USER, choice = d.onboard;
+    fsdb.collection("users").doc(u.uid).get().then(snap=>{
+      if(USER!==u) return;
+      const remote = snap.exists ? readProfile((snap.data()||{}).json) : null;
+      if(remote){ ME = remote; migrateProfile(ME); render(); toast("Bu hesapta zaten bir liste var, o yüklendi."); return; }
+      onboard(choice, nm);
+    }).catch(()=>{ if(USER===u) toast("Bağlanılamadı. İnternet bağlantını kontrol et."); });
+    return;
+  }
+  if(d.act==="signout"){
+    if(SIGNING_OUT) return;
+    const u = USER; SIGNING_OUT = true; SW = null; renderSheet(); render();
+    flushSave().then(ok=>{
+      // kaydedilemediyse tek kopya bu cihazda; silme, tekrar girince hesaba yüklenir
+      if(ok){ try{ localStorage.removeItem(cacheKey(u)); }catch(e){} }
+      else toast("İnternet yok: son değişikliklerin bu cihazda saklandı, tekrar girince hesabına yüklenecek.");
+      auth.signOut();
+    });
+    return;
+  }
+  if(d.act==="retry"){ if(USER) loadMe(USER); return; }
+  if(d.act==="resetpass"){
+    const em = (($("#aemail")||{}).value||"").trim();
+    if(!em){ showAuthErr("Önce e-posta adresini yaz."); return; }
+    auth.sendPasswordResetEmail(em).then(()=>{ showAuthErr(""); toast("Şifre sıfırlama e-postası gönderildi"); }).catch(e=>showAuthErr(authError(e)));
+    return;
+  }
   if(d.tab){ TAB=d.tab; confirmKey=null; try{localStorage.setItem("degisim-tab",TAB)}catch(e){} render(); return; }
   if(d.go){ TAB=d.go; render(); return; }
   if(d.gtab){ GTAB=d.gtab; render(); return; }
   if(d.check){ const k=todayKey(); const p=P(); p.log={[k]:p.log[k]||{}}; p.log[k][d.check]=!p.log[k][d.check]; if(!p.log[k][d.check]) delete p.log[k][d.check]; save(); render(); return; }
   if(d.swap){ openSwap(d.swap); return; }
+  if(d.all!==undefined || d.inc || d.dec || d.swapreset || d.swapsave){ if(!SW || !findItem(SW.iid)){ closeSwap(); return; } }
   if(d.all){
     const {it}=findItem(SW.iid); const f=FOOD[it.group+":"+d.all];
-    SW.counts={};
+    SW.counts={}; SW.note="";
     const u = f.gi ? Math.min(it.units, Math.floor(giRoom(it)/SW.step+1e-9)*SW.step) : it.units;
     if(u>0) SW.counts[d.all]=u;
-    if(u<it.units) toast(u>0 ? `* meyveden günde en fazla ${GI_MAX} porsiyon. Kalanı başka meyveden seç.` : `* meyve hakkın bugün doldu. Başka meyve seç.`);
+    const room = giRoom(it);
+    if(u<it.units) toast(u>0 ? `* meyveden günde en fazla ${GI_MAX} porsiyon. Kalanı başka meyveden seç.` : room > 1e-9 ? `Bugün * meyveden ${fmtNum(room)} porsiyon hakkın kaldı; bu kalem ${fmtNum(SW.step)} porsiyonluk adımlarla değişir. Başka meyve seç.` : `* meyve hakkın bugün doldu. Başka meyve seç.`);
     renderSheet(); return;
   }
   if(d.inc){
-    const {it}=findItem(SW.iid); const used=Object.values(SW.counts).reduce((a,b)=>a+b,0);
-    if(!canInc(it, FOOD[it.group+":"+d.inc], used)) return;
-    SW.counts[d.inc]=(SW.counts[d.inc]||0)+SW.step; renderSheet(); return;
+    const {it}=findItem(SW.iid); const r=incPlan(it, d.inc);
+    if(!r){ toast(FOOD[it.group+":"+d.inc]?.gi ? `* meyveden günde en fazla ${GI_MAX} porsiyon.` : "Artırılamıyor."); return; }
+    SW.counts = r.c;
+    SW.note = r.donor ? `${FOOD[it.group+":"+r.donor].name} ${fmtNum(SW.step)} azaldı, ${FOOD[it.group+":"+d.inc].name} ${fmtNum(SW.step)} arttı. Toplam aynı.` : "";
+    renderSheet(); return;
   }
-  if(d.dec){ SW.counts[d.dec]=Math.max(0,(SW.counts[d.dec]||0)-SW.step); renderSheet(); return; }
-  if(d.swapreset){ const {it}=findItem(SW.iid); SW.counts={}; it.def.forEach(x=>SW.counts[x.f]=x.u); renderSheet(); return; }
+  if(d.dec){ SW.counts[d.dec]=Math.max(0,(SW.counts[d.dec]||0)-SW.step); if(SW.counts[d.dec]<1e-9) delete SW.counts[d.dec]; SW.note=""; renderSheet(); return; }
+  if(d.swapreset){
+    const {it}=findItem(SW.iid); SW.counts={}; SW.note="";
+    let room = Math.max(0, GI_MAX - giOutside(it.id)), cut = false;
+    it.def.forEach(x=>{ let u = x.u; if(FOOD[it.group+":"+x.f]?.gi){ const ok = Math.min(u, Math.floor(room/SW.step+1e-9)*SW.step); if(ok<u) cut=true; u=ok; room-=u; } if(u>0) SW.counts[x.f]=(SW.counts[x.f]||0)+u; });
+    if(cut) toast(`* meyve hakkı dolu. Eksik kalanı başka meyveden seç.`);
+    renderSheet(); return;
+  }
   if(d.swapsave){ saveSwap(); return; }
-  if(d.delmeal){ if(confirmKey!=="meal:"+d.delmeal){ confirmKey="meal:"+d.delmeal; render(); return; } P().meals=P().meals.filter(m=>m.id!==d.delmeal); confirmKey=null; save(); render(); return; }
   if(d.delitem){ const [mid,iid]=d.delitem.split("|"); const m=P().meals.find(x=>x.id===mid); m.items=m.items.filter(x=>x.id!==iid); save(); render(); return; }
   if(d.additem){
     const mid=d.additem, g=$("#ag-"+mid).value, u=parseFloat($("#au-"+mid).value), fv=$("#af-"+mid).value.trim();
     const m=P().meals.find(x=>x.id===mid);
     if(g==="free"){ if(!fv){ toast("Önce metni yaz"); return; } m.items.push(fr(fv)); }
     else {
-      const L=limitsOf(S.active), {t,gi}=totals(P());
+      const L=limitsOf(P()), {t,gi}=totals(P()), ML=mealLimitsOf(P(),m);
+      if(ML){ const room=ML[g]-mealTotals(m)[g]; if(u > room+1e-9){ toast(room>1e-9 ? `${m.name} öğününde ${GROUPS[g].name.toLocaleLowerCase("tr")} için en fazla ${fmtNum(room)} değişim ekleyebilirsin.` : m.key && ML[g] <= 1e-9 ? `Diyetisyen listesinde ${m.name} öğününde ${GROUPS[g].name.toLocaleLowerCase("tr")} yok; bu öğüne eklenemez.` : m.key ? `${m.name} öğününde ${GROUPS[g].name.toLocaleLowerCase("tr")} limiti (${fmtNum(ML[g])}) dolu. Önce bu öğünden bir kalemi sil.` : `Bu öğün diyetisyen listesinde yok; sadece serbest kalem eklenebilir.`); return; } }
       if(L && t[g]+u > L[g]+1e-9){ const room=L[g]-t[g]; toast(room>0 ? `Günlük ${GROUPS[g].name.toLocaleLowerCase("tr")} limiti ${fmtNum(L[g])}. En fazla ${fmtNum(room)} değişim ekleyebilirsin.` : `Günlük ${GROUPS[g].name.toLocaleLowerCase("tr")} limiti (${fmtNum(L[g])}) dolu. Önce başka bir kalemi sil.`); return; }
       if(FOOD[g+":"+fv]?.gi && gi+u > GI_MAX+1e-9){ toast(`* meyveden günde en fazla ${GI_MAX} porsiyon.`); return; }
       m.items.push(ex(g,u,fv));
@@ -681,19 +1393,32 @@ document.addEventListener("click", e=>{
     save(); render(); toast("Eklendi"); return;
   }
   if(d.act==="addmeal"){ P().meals.push({id:nid("m"),name:"Yeni öğün",time:"",items:[]}); save(); render(); return; }
-  if(d.act==="reset"){ if(confirmKey!=="reset"){ confirmKey="reset"; render(); return; } P().meals=berkayPlan(); confirmKey=null; save(); render(); toast("Diyetisyen listesine dönüldü"); return; }
-  if(d.act==="copy-berkay"){
-    if(P().meals.length && confirmKey!=="copy"){ confirmKey="copy"; render(); return; }
-    P().meals = JSON.parse(JSON.stringify(S.profiles.p1.meals)).map(m=>({...m,id:nid("m"),items:m.items.map(it=>({...it,id:nid()}))}));
-    confirmKey=null; save(); render(); toast("Liste kopyalandı"); return;
+  if(d.act==="reset"){ if(!isLocked(P())) return; if(P().meals.length && confirmKey!=="reset"){ confirmKey="reset"; render(); return; } P().meals=cloneMeals(P().diet.meals); confirmKey=null; save(); render(); toast("Diyetisyen listesine dönüldü"); return; }
+  if(d.act==="clearswaps"){
+    let skipped = 0;
+    P().meals.forEach(m=>m.items.forEach(it=>{
+      if(it.kind!=="ex" || !it.sel) return;
+      if(giOutside(it.id) + giOfList(it.group, it.def) > GI_MAX + 1e-9){ skipped++; return; }
+      it.sel = null;
+    }));
+    save(); render(); toast(skipped ? `Değişimler geri alındı; * meyve sınırı yüzünden ${skipped} kalem değişik kaldı.` : "Tüm değişimler geri alındı"); return;
   }
-  if(d.act==="clearswaps"){ P().meals.forEach(m=>m.items.forEach(it=>{ if(it.kind==="ex") it.sel=null; })); save(); render(); toast("Tüm değişimler geri alındı"); return; }
-  if(d.act==="export"){ const ta=$("#io"); ta.value=JSON.stringify(S); ta.select();
-    try{ navigator.clipboard.writeText(ta.value).then(()=>toast("Kopyalandı"),()=>toast("Metin seçildi, kopyala")); }catch(err){ toast("Metin seçildi, kopyala"); } return; }
-  if(d.act==="import"){ try{ const o=JSON.parse($("#io").value); if(!o.profiles||!o.profiles.p1) throw 0; S=o; save(); render(); toast("İçe aktarıldı"); }catch(err){ toast("Metin okunamadı. Yedeğin tamamını yapıştır."); } return; }
 });
 document.addEventListener("change", e=>{
   const t = e.target;
+  if(t.id==="impfile"){ const files=[...t.files]; if(files.length) runImport(files); return; }
+  if(IMP && IMP.meals){
+    const k = t.dataset.impg||t.dataset.impu||t.dataset.impf||t.dataset.imptx;
+    if(t.dataset.impmeal){ IMP.meals[+t.dataset.impmeal].name = t.value; return; }
+    if(t.dataset.imptime){ IMP.meals[+t.dataset.imptime].time = t.value; return; }
+    if(k){ const [mi,ii]=k.split("-").map(Number); const it = IMP.meals[mi].items[ii];
+      if(t.dataset.impg){ if(t.value==="free"){ Object.assign(it,{kind:"free", text:it.orig||""}); } else { Object.assign(it,{kind:"ex", group:t.value, food:GROUPS[t.value].foods[0].id, units:it.units||1}); } it.check=false; render(); }
+      else if(t.dataset.impu){ it.units = parseFloat(t.value); it.check=false; render(); }
+      else if(t.dataset.impf){ it.food = t.value; it.check=false; render(); }
+      else if(t.dataset.imptx){ it.text = t.value; }
+      return; }
+  }
+  if(!P()) return;
   if(t.id==="pname"){ P().name = t.value.trim() || "Profil"; save(); render(); }
   else if(t.id==="pfull"){ P().fullName = t.value.trim(); save(); }
   else if(t.id==="psrc"){ P().source = t.value.trim(); save(); }
@@ -701,7 +1426,23 @@ document.addEventListener("change", e=>{
   else if(t.dataset.mtime){ P().meals.find(m=>m.id===t.dataset.mtime).time=t.value; save(); }
   else if(t.dataset.addgroup){ $("#af-wrap-"+t.dataset.addgroup).innerHTML = foodSelect(t.dataset.addgroup, t.value); }
 });
-document.addEventListener("keydown", e=>{ if(e.key==="Escape" && SW){ SW=null; renderSheet(); } });
+document.addEventListener("submit", e=>{
+  if(e.target.id!=="authform") return;
+  e.preventDefault();
+  const em = $("#aemail").value.trim(), pw = $("#apass").value, up = AUTH_MODE==="signup";
+  AUTH_EMAIL = em;
+  if(!em || !pw){ showAuthErr("E-posta ve şifreyi yaz."); return; }
+  if(up && pw.length < 6){ showAuthErr("Şifre en az 6 karakter olmalı."); return; }
+  if(up && pw !== $("#apass2").value){ showAuthErr("Şifreler aynı değil."); return; }
+  const btn = $("#asubmit"); btn.disabled = true; showAuthErr("");
+  (up ? auth.createUserWithEmailAndPassword(em, pw) : auth.signInWithEmailAndPassword(em, pw))
+    .catch(err=>{ showAuthErr(authError(err)); btn.disabled = false; });
+});
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape" && SW){ closeSwap(); return; }
+  // giriş formunda Enter her klavyede formu göndersin
+  if(e.key==="Enter" && e.target.closest && e.target.closest("#authform") && e.target.tagName==="INPUT"){ e.preventDefault(); const f=$("#authform"); if(!$("#asubmit").disabled) f.requestSubmit(); }
+});
 
 render();
 </script>
