@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Değişim Menüsü</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#EEF3F0; --surface:#FFFFFF; --surface-2:#F6F9F7; --line:#D6E0DA;
+  --ink:#15241D; --muted:#5A6B62; --accent:#1C6E4C; --accent-ink:#FFFFFF; --accent-soft:#DCEEE4;
+  --warn:#9A4A10; --warn-soft:#FBEBDD; --ok:#1C6E4C;
+  --g-et:#B0472F; --g-sut:#2F6DB5; --g-sebze:#3F8A2E; --g-meyve:#C27A12; --g-ekmek:#86643A; --g-yag:#7461AE; --g-serbest:#6B7C73;
+  --shadow:0 10px 40px rgba(20,40,30,.18);
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0F1714; --surface:#17221D; --surface-2:#1C2923; --line:#2A3A32;
+    --ink:#E4EEE8; --muted:#94A69C; --accent:#5CC393; --accent-ink:#0B1A13; --accent-soft:#1D3A2C;
+    --warn:#F0A868; --warn-soft:#3A2717;
+    --g-et:#E27C63; --g-sut:#6FA5E6; --g-sebze:#7CC46A; --g-meyve:#E8A948; --g-ekmek:#C39A68; --g-yag:#A897E0; --g-serbest:#8FA198;
+    --shadow:0 10px 40px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1714; --surface:#17221D; --surface-2:#1C2923; --line:#2A3A32;
+  --ink:#E4EEE8; --muted:#94A69C; --accent:#5CC393; --accent-ink:#0B1A13; --accent-soft:#1D3A2C;
+  --warn:#F0A868; --warn-soft:#3A2717;
+  --g-et:#E27C63; --g-sut:#6FA5E6; --g-sebze:#7CC46A; --g-meyve:#E8A948; --g-ekmek:#C39A68; --g-yag:#A897E0; --g-serbest:#8FA198;
+  --shadow:0 10px 40px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:0 64px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;display:grid;gap:12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand h1{font-size:24px;font-weight:700}
+.brand small{color:var(--muted);font-size:13px}
+.profiles{display:flex;gap:6px;flex-wrap:wrap}
+.pbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-weight:500;display:flex;align-items:center;gap:8px}
+.pbtn .dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:600;background:var(--surface-2);color:var(--muted)}
+.pbtn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pbtn[aria-pressed="true"] .dot{background:var(--accent);color:var(--accent-ink)}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tab{border:0;background:none;padding:6px 12px;border-radius:8px;color:var(--muted);font-weight:600;white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--accent-soft);color:var(--accent)}
+
+.owner{margin:16px 0 0;color:var(--muted);font-size:13px;font-weight:500}
+/* totals */
+.day{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-block:18px 8px;flex-wrap:wrap}
+.day h2{font-size:18px}
+.day .meta{color:var(--muted);font-size:13px}
+.totals{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+@media (max-width:560px){.totals{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tot{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:grid;gap:2px}
+.tot b{font-family:var(--f-display);font-size:22px;line-height:1}
+.tot span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:flex;align-items:center;gap:6px}
+.tot span::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--c)}
+.alert{margin-top:10px;background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:500}
+
+/* meals */
+.meals{display:grid;gap:14px;margin-top:18px}
+.meal{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.meal-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:12px 14px 8px;flex-wrap:wrap}
+.meal-h h3{font-size:18px}
+.meal-h .time{color:var(--muted);font-size:13px}
+.items{list-style:none;margin:0;padding:0}
+.item{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.check{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line);background:var(--surface-2);display:grid;place-items:center;padding:0}
+.check[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.check svg{width:14px;height:14px}
+.item.done .what{opacity:.5;text-decoration:line-through}
+.what{display:grid;gap:3px;min-width:0}
+.food{font-weight:600}
+.food .amt{font-weight:500;color:var(--muted)}
+.food .star{color:var(--g-meyve)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--c)}
+.chip::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--c)}
+.chip .n{color:var(--muted)}
+.swapped{font-size:11px;color:var(--accent);font-weight:600;text-transform:none;letter-spacing:0}
+.free .food{font-weight:500}
+.btn{border:1px solid var(--line);background:var(--surface-2);border-radius:9px;padding:6px 12px;font-weight:600;font-size:13px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:none}
+.btn.danger{color:var(--warn)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:22px;text-align:center;display:grid;gap:10px;justify-items:center;margin-top:18px}
+.empty p{margin:0;color:var(--muted);max-width:44ch}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(10,20,15,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:640px;max-height:88vh;border-radius:18px 18px 0 0;box-shadow:var(--shadow);display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (min-width:700px){.scrim{align-items:center}.sheet{border-radius:18px}}
+.sheet-h{padding:16px 16px 10px;display:grid;gap:6px;border-bottom:1px solid var(--line)}
+.sheet-h h3{font-size:20px}
+.sheet-h p{margin:0;color:var(--muted);font-size:13px}
+.meter{display:flex;gap:4px;margin-top:4px}
+.meter i{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.meter i.on{background:var(--c)}
+.meter i.over{background:var(--warn)}
+.sheet-b{overflow-y:auto;padding:4px 0}
+.opt{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
+.opt.sel{background:var(--surface-2)}
+.opt .nm{font-weight:600;background:none;border:0;padding:0;text-align:left}
+.opt .nm:hover{color:var(--accent)}
+.opt .sub{font-size:13px;color:var(--muted)}
+.opt .cur{font-size:13px;color:var(--accent);font-weight:600}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--surface-2);font-weight:700;font-size:16px;padding:0}
+.step output{min-width:22px;text-align:center;font-weight:700}
+.sheet-f{display:flex;gap:8px;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.sheet-f .right{display:flex;gap:8px}
+.hint{font-size:12px;color:var(--muted)}
+
+/* tables tab */
+.explain{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:18px;display:grid;gap:8px}
+.explain h2{font-size:18px}
+.explain p{margin:0;color:var(--muted);max-width:68ch}
+.gtabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px}
+.gtab{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px}
+.gtab::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--c)}
+.gtab[aria-selected="true"]{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
+.tbl-wrap{overflow-x:auto;margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tnote{font-size:13px;color:var(--muted);margin:10px 2px 0}
+
+/* rules tab */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+@media (max-width:620px){.cols{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px;align-content:start}
+.card h2{font-size:17px}
+.card ul{margin:0;padding-left:18px;display:grid;gap:6px}
+.card.no h2{color:var(--warn)}
+
+/* edit tab */
+.form{display:grid;gap:14px;margin-top:18px}
+.field{display:grid;gap:4px}
+.field label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+input[type=text],select,textarea{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 10px;width:100%}
+textarea{min-height:120px;font-size:12px;font-family:ui-monospace,Menlo,monospace}
+.erow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 14px;border-top:1px solid var(--line)}
+.erow .what{font-size:14px}
+.emeal-h{display:grid;grid-template-columns:1fr 150px auto;gap:8px;padding:12px 14px}
+@media (max-width:520px){.emeal-h{grid-template-columns:1fr 1fr}.emeal-h .btn{grid-column:1/-1}}
+.add{display:grid;grid-template-columns:1fr 90px 1fr auto;gap:8px;padding:10px 14px;border-top:1px solid var(--line);background:var(--surface-2)}
+@media (max-width:560px){.add{grid-template-columns:1fr 1fr}}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-weight:600;font-size:13px;z-index:30}
+.sync{font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Değişim Menüsü</h1>
+      <small id="sync" class="sync">Bu cihazda kayıtlı</small>
+    </div>
+    <div class="profiles" id="profiles" role="group" aria-label="Profiller"></div>
+    <nav class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-tab="menu">Menü</button>
+      <button class="tab" role="tab" data-tab="tables">Değişim tabloları</button>
+      <button class="tab" role="tab" data-tab="rules">Kurallar</button>
+      <button class="tab" role="tab" data-tab="edit">Profili düzenle</button>
+    </nav>
+  </header>
+  <main id="main"></main>
+</div>
+<div id="sheet-root"></div>
+
+<script>
+/* ============================================================
+   DEĞİŞİM SİSTEMİ
+   Diyet listesi yemek adıyla değil "değişim" (porsiyon eşdeğeri)
+   sayısıyla kurulur. Aynı gruptaki her besinin 1 değişimi aynı
+   enerji/makro değerini taşır; bu yüzden bir öğündeki 3 ekmek
+   değişimi, 3 dilim ekmek yerine 6 yk pilav ya da 1 dilim ekmek +
+   4 yk pilav olarak yenebilir. Gruplar arası değişim yapılmaz.
+   Miktarlar diyetisyen listesindeki tablolardan alınmıştır.
+   ============================================================ */
+const GROUPS = {
+  et:{name:"Et",long:"Et değişimi",color:"--g-et",info:"Protein grubu. 1 değişim ≈ 30 g pişmiş et, 1 yumurta veya 1 kibrit kutusu beyaz peynir.",
+    foods:[
+      {id:"kofte",name:"Köfte",n:1,u:"yumurta büyüklüğü",g:30},
+      {id:"kiyma",name:"Kıyma",n:1,u:"köfte büyüklüğü",g:30},
+      {id:"kusbasi",name:"Kuşbaşı et",n:[3,4],u:"parça",g:30},
+      {id:"pirzola",name:"Pirzola",n:1,u:"adet",g:30},
+      {id:"biftek",name:"Biftek",n:1,u:"orta büyüklükte",g:30},
+      {id:"tavuk",name:"Tavuk / Hindi",n:1,u:"köfte büyüklüğü",g:30},
+      {id:"balik",name:"Balık",n:1,u:"köfte kadar",g:30},
+      {id:"ton",name:"Ton balığı (light)",n:1,u:"köfte kadar",g:40},
+      {id:"yumurta",name:"Yumurta",n:1,u:"adet",g:50},
+      {id:"beyaz",name:"Beyaz peynir",n:1,u:"kibrit kutusu kadar",g:30},
+      {id:"kasar",name:"Kaşar peyniri",n:2/3,u:"kibrit kutusu kadar",g:20},
+      {id:"cokelek",name:"Çökelek",n:1,u:"yemek kaşığı",g:30},
+      {id:"lor",name:"Lor peyniri",n:4,u:"yemek kaşığı",g:40},
+      {id:"lightkasar",name:"Light kaşar",n:1,u:"kibrit kutusu kadar",g:30}
+    ]},
+  sut:{name:"Süt",long:"Süt değişimi",color:"--g-sut",info:"1 değişim = 1 su bardağı süt. Ayran sulandırıldığı için 2 bardak = 1 değişim.",
+    foods:[
+      {id:"sut",name:"Süt",n:1,u:"su bardağı",ml:200},
+      {id:"yogurt",name:"Yoğurt",n:4,u:"yemek kaşığı",note:"listede 1 su bardağı / 200 g olarak da geçer"},
+      {id:"ayran",name:"Ayran",n:2,u:"su bardağı",ml:400},
+      {id:"kefir",name:"Kefir",n:1,u:"su bardağı",ml:200}
+    ]},
+  sebze:{name:"Sebze",long:"Sebze değişimi",color:"--g-sebze",info:"Çiğ sebzeler yağsız olarak serbesttir. Pişmiş sebze yemeği 4 yemek kaşığı = 1 porsiyon.",
+    foods:[
+      {id:"sebzeyemegi",name:"Pişmiş sebze yemeği",n:4,u:"yemek kaşığı"},
+      {id:"havuc",name:"Havuç",n:1,u:"orta boy",g:100},
+      {id:"havucsuyu",name:"Havuç suyu",n:.5,u:"su bardağı",ml:120}
+    ]},
+  meyve:{name:"Meyve",long:"Meyve değişimi",color:"--g-meyve",info:"Tablodaki miktarlar 1 porsiyondur. * işaretli meyveler kan şekerini hızlı yükseltir: günde en fazla 1 porsiyon.",
+    foods:[
+      {id:"elma",name:"Elma",n:1,u:"küçük boy",g:100},
+      {id:"armut",name:"Armut",n:1,u:"orta boy",g:100},
+      {id:"portakal",name:"Portakal",n:1,u:"orta boy",g:100},
+      {id:"mandalina",name:"Mandalina",n:1,u:"büyük boy",g:100},
+      {id:"greyfurt",name:"Greyfurt",n:.5,u:"adet",g:125},
+      {id:"muz",name:"Muz",n:1,u:"küçük boy",g:50,gi:true},
+      {id:"incir",name:"Taze incir",n:1,u:"adet",g:80,gi:true},
+      {id:"ayva",name:"Ayva",n:.25,u:"orta boy",g:80},
+      {id:"seftali",name:"Şeftali",n:1,u:"orta boy",g:100},
+      {id:"kayisi",name:"Taze kayısı",n:3,u:"orta boy",g:100},
+      {id:"kiraz",name:"Kiraz",n:12,u:"adet",g:75},
+      {id:"visne",name:"Vişne",n:14,u:"adet",g:80},
+      {id:"cilek",name:"Çilek",n:12,u:"orta boy",g:175},
+      {id:"nar",name:"Nar",n:.5,u:"adet",g:80},
+      {id:"kivi",name:"Kivi",n:1,u:"orta boy",g:120},
+      {id:"yesilerik",name:"Yeşil erik",n:10,u:"küçük adet",g:100},
+      {id:"kirmizierik",name:"Kırmızı erik",n:5,u:"adet",g:60},
+      {id:"murdum",name:"Mürdüm eriği",n:3,u:"adet",g:60},
+      {id:"karpuz",name:"Karpuz",n:1,u:"ince dilim",g:200,gi:true},
+      {id:"kavun",name:"Kavun",n:1,u:"ince dilim",g:200,gi:true},
+      {id:"uzum",name:"Üzüm",n:15,u:"adet",g:90,gi:true},
+      {id:"bogurtlen",name:"Böğürtlen",n:.5,u:"su bardağı",g:90},
+      {id:"dut",name:"Dut",n:.5,u:"su bardağı",g:60,gi:true},
+      {id:"hurma",name:"Hurma",n:[2,3],u:"adet",g:20,gi:true},
+      {id:"kurukayisi",name:"Kuru kayısı",n:3,u:"adet",g:20,gi:true},
+      {id:"kuruuzum",name:"Kuru üzüm",n:1,u:"yemek kaşığı",g:20,gi:true},
+      {id:"kuruincir",name:"Kuru incir",n:1,u:"adet",g:20,gi:true},
+      {id:"kuruerik",name:"Kuru erik",n:5,u:"adet",g:20,gi:true},
+      {id:"ananas",name:"Ananas",n:1,u:"dilim",g:75},
+      {id:"yenidunya",name:"Yeni dünya",n:[6,7],u:"adet",g:125},
+      {id:"avokado",name:"Avokado",n:.5,u:"adet",g:150}
+    ]},
+  ekmek:{name:"Ekmek",long:"Ekmek değişimi",color:"--g-ekmek",info:"1 ince dilim (25 g) tam buğday / çavdar ekmeği yerine geçen yiyecekler. Pilav, makarna, patates, bakliyat da bu gruptadır.",
+    foods:[
+      {id:"tam",name:"Tam buğday / çavdar ekmeği",n:1,u:"ince dilim",g:25},
+      {id:"corba",name:"Çorba",n:1,u:"orta kase (1 kepçe)"},
+      {id:"pilav",name:"Pilav (pirinç / bulgur)",n:2,u:"yemek kaşığı"},
+      {id:"makarna",name:"Makarna / erişte",n:2,u:"yemek kaşığı"},
+      {id:"bakliyat",name:"Kuru baklagil (nohut, kuru fasulye, barbunya)",n:4,u:"yemek kaşığı"},
+      {id:"patates",name:"Haşlanmış patates",n:1,u:"küçük boy",g:90},
+      {id:"patlamis",name:"Patlamış mısır (yağsız)",n:1,u:"su bardağı"},
+      {id:"misir",name:"Haşlanmış mısır",n:2,u:"yemek kaşığı"},
+      {id:"leblebi",name:"Sade leblebi",n:1,u:"çay bardağı"},
+      {id:"yufka",name:"Yufka",n:1/8,u:"adet"},
+      {id:"sandvic",name:"Sandviç ekmeği",n:1/3,u:"adet"},
+      {id:"hamburger",name:"Hamburger ekmeği",n:.5,u:"adet"},
+      {id:"etimek",name:"Etimek / Wasa",n:2,u:"adet"},
+      {id:"tuzlubiskuvi",name:"Tuzlu bisküvi",n:2,u:"adet"},
+      {id:"galeta",name:"Galeta (kepekli, haşhaşlı, sade)",n:2,u:"adet"},
+      {id:"diyetbiskuvi",name:"Kepekli tuzlu diyet bisküvi",n:5,u:"adet"},
+      {id:"tatlibiskuvi",name:"Kepekli tatlı bisküvi",n:2,u:"adet"},
+      {id:"yulaf",name:"Yulaf ezmesi",n:2,u:"yemek kaşığı"},
+      {id:"grissini",name:"Grissini",n:3,u:"adet"},
+      {id:"bazlama",name:"Bazlama ekmeği",n:1/8,u:"adet"}
+    ]},
+  yag:{name:"Yağ",long:"Yağ değişimi",color:"--g-yag",info:"1 değişim 5 g yağ içerir. Yemeklerde 2 porsiyon için 1 yemek kaşığı yağ kullanılır.",
+    foods:[
+      {id:"zeytin",name:"Zeytin",n:5,u:"adet",g:15},
+      {id:"zeytinyagi",name:"Zeytinyağı",n:1,u:"tatlı kaşığı",g:5},
+      {id:"sivi",name:"Bitkisel sıvı yağ",n:1,u:"tatlı kaşığı",g:5},
+      {id:"ceviz",name:"Ceviz içi",n:2,u:"adet",g:8},
+      {id:"findik",name:"Fındık içi",n:[5,6],u:"adet",g:10},
+      {id:"badem",name:"Badem",n:[5,6],u:"adet",g:10}
+    ]}
+};
+const GKEYS = Object.keys(GROUPS);
+const FOOD = {}; GKEYS.forEach(k=>GROUPS[k].foods.forEach(f=>{FOOD[k+":"+f.id]=f}));
+
+const RULES = {
+  avoid:[
+    "Şeker ve şekerli yiyecekler (bal, reçel, pekmez, marmelat, şurup, dondurma, helva, gofret, çikolata vb.)",
+    "Hamur işleri (börek, çörek, pasta, kek, kurabiye vb.)",
+    "Sucuk, salam, sosis, pastırma, karides, kalamar, midye vb.",
+    "Sakatatlar (karaciğer, beyin, böbrek, yürek, dil, işkembe, kokoreç vb.)",
+    "Yağlı yiyecekler (cips, mayonez, tahin, kaymak, krema, tavuk derisi, koyun eti vb.)",
+    "Kuyruk yağı, iç yağı, margarin, tereyağı",
+    "Yağda kızartılmış ve yağlı sos eklenmiş yiyecekler (et, sebze, hamur, balık kızartma vb.)",
+    "Yağlı kuruyemişler (çekirdek, fıstık vb.)",
+    "Meşrubatlar (kolalı ve asitli içecekler, hazır meyve suları)",
+    "Alkollü içecekler"
+  ],
+  tips:[
+    "Diyetinizin yeterli ve dengeli olması için yiyecekleri belirtilen miktarlarda ve öğünlerde yiyin.",
+    "Öğün atlamayın.",
+    "Haftada en az 1-2 kez balık yiyin; ızgara, fırın veya buğulama tercih edin.",
+    "Kabuğu yenebilen meyveleri kabuğuyla birlikte tüketin.",
+    "Haftada birkaç gün posa açısından zengin kuru baklagil yemeği tercih edin.",
+    "Günde en az 8-10 bardak su için.",
+    "2 porsiyon yemek için 1 yemek kaşığı yağ kullanın.",
+    "Çiğ sebzeler yağsız olarak serbesttir.",
+    "Kontrole diyet listenizle birlikte gidin."
+  ]
+};
+
+/* ---------- Berkay Er: diyetisyenin örnek yemek listesi, değişime çevrilmiş ---------- */
+let uid = 0; const nid = p => (p||"i") + Date.now().toString(36) + (uid++).toString(36);
+function ex(group, units, food, orig){ return {id:nid(), kind:"ex", group, units, def:[{f:food,u:units}], sel:null, orig:orig||""}; }
+function fr(text){ return {id:nid(), kind:"free", text}; }
+function berkayPlan(){
+  return [
+    {id:nid("m"),name:"Sabah",time:"10.30 – 11.00",items:[
+      fr("Çay, ıhlamur vb. (şekersiz)"),
+      ex("et",2,"beyaz","2 dilim peynir"),
+      ex("et",1,"yumurta","1 adet yumurta"),
+      ex("yag",1,"zeytin","5-6 adet zeytin"),
+      ex("ekmek",3,"tam","3 ince dilim tam buğday / çavdar ekmek"),
+      fr("Mevsimine göre domates, salatalık, yeşillik (yağsız)")
+    ]},
+    {id:nid("m"),name:"Öğle",time:"14.00 – 14.30",items:[
+      ex("ekmek",3,"pilav","6 yemek kaşığı pilav veya makarna"),
+      ex("sebze",2,"sebzeyemegi","6-8 yemek kaşığı sebze yemeği"),
+      fr("Salata (az yağlı)"),
+      ex("ekmek",1,"tam","1 ince dilim tam buğday / çavdar ekmek"),
+      ex("sut",1,"yogurt","4 yk yoğurt veya 2 su bardağı ayran")
+    ]},
+    {id:nid("m"),name:"Akşam",time:"17.00 – 17.30",items:[
+      ex("ekmek",4,"pilav","8 yemek kaşığı pilav veya makarna"),
+      ex("et",6,"kofte","6 köfte kadar dana eti / tavuk / hindi / balık"),
+      fr("Salata (az yağlı)"),
+      ex("ekmek",1,"tam","1 ince dilim tam buğday / çavdar ekmek")
+    ]},
+    {id:nid("m"),name:"Gece · spor sonrası",time:"21.00 – 21.30",items:[
+      ex("meyve",2,"elma","2 porsiyon meyve (Tablo 4)"),
+      ex("sut",1,"yogurt","4 yk yoğurt veya 1 su bardağı süt")
+    ]}
+  ];
+}
+function freshState(){
+  return {v:1, updated:Date.now(), active:"p1", profiles:{
+    p1:{name:"Berkay Er", fullName:"Mehmet Berkay Er", source:"Aydın Kuşadası İlçe Sağlık Müdürlüğü", meals:berkayPlan(), log:{}},
+    p2:{name:"Profil 2", meals:[], log:{}},
+    p3:{name:"Profil 3", meals:[], log:{}}
+  }};
+}
+
+/* ---------- storage: browser + (artifact'te) paylaşılan kayıt ---------- */
+const LS_KEY = "degisim-menusu-v1";
+let S; let db = null;
+try{ const raw = localStorage.getItem(LS_KEY); if(raw) S = JSON.parse(raw); }catch(e){}
+if(!S || !S.profiles) S = freshState();
+function migrate(){ const p1 = S.profiles.p1; if(p1 && p1.fullName===undefined){ p1.fullName="Mehmet Berkay Er"; p1.source="Aydın Kuşadası İlçe Sağlık Müdürlüğü"; } }
+migrate();
+let saveTimer = null;
+function save(){
+  S.updated = Date.now();
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){}
+  if(db){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=>{
+      db.doc("app/state").set({json:JSON.stringify(S)})
+        .then(()=>setSync("Hesabına kaydedildi"))
+        .catch(()=>setSync("Kaydedilemedi, bu cihazda duruyor"));
+    }, 600);
+  }
+}
+function setSync(t){ document.getElementById("sync").textContent = t; }
+(async ()=>{
+  try{
+    if(!window.claude || !window.claude.use) return;
+    const d = await window.claude.use("db");
+    if(!d) return;
+    const snap = await d.doc("app/state").get();
+    db = d;
+    if(snap.exists){
+      const remote = JSON.parse(snap.data().json);
+      if(remote && remote.profiles && (remote.updated||0) >= (S.updated||0)){ S = remote; migrate(); render(); }
+      else save();
+    } else save();
+    setSync("Hesabına kaydediliyor");
+  }catch(e){}
+})();
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const P = () => S.profiles[S.active];
+const todayKey = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const FR = [[1/8,"⅛"],[1/4,"¼"],[1/3,"⅓"],[3/8,"⅜"],[1/2,"½"],[5/8,"⅝"],[2/3,"⅔"],[3/4,"¾"],[7/8,"⅞"]];
+function fmtNum(x){
+  const w = Math.floor(x+1e-9), r = x - w;
+  if(r < 0.02) return String(w);
+  if(r > 0.98) return String(w+1);
+  const hit = FR.find(([v])=>Math.abs(v-r)<0.02);
+  if(hit) return (w? w+" ":"") + hit[1];
+  return (Math.round(x*10)/10).toString().replace(".",",");
+}
+function amount(f, units){
+  const q = Array.isArray(f.n) ? f.n.map(v=>fmtNum(v*units)).join("-") : fmtNum(f.n*units);
+  let extra = "";
+  if(f.g) extra = " · " + fmtNum(f.g*units) + " g";
+  else if(f.ml) extra = " · " + fmtNum(f.ml*units) + " ml";
+  return q + " " + f.u + extra;
+}
+function portions(it){ return it.sel || it.def; }
+function isSwapped(it){ return !!it.sel; }
+function gcolor(k){ return "var("+GROUPS[k].color+")"; }
+function totals(p){
+  const t = {}; GKEYS.forEach(k=>t[k]=0);
+  let gi = 0;
+  p.meals.forEach(m=>m.items.forEach(it=>{
+    if(it.kind!=="ex") return;
+    t[it.group]+=it.units;
+    portions(it).forEach(x=>{ const f=FOOD[it.group+":"+x.f]; if(f&&f.gi) gi+=x.u; });
+  }));
+  return {t, gi};
+}
+function toast(msg){
+  const el = document.createElement("div"); el.className="toast"; el.textContent=msg;
+  document.body.appendChild(el); setTimeout(()=>el.remove(),1800);
+}
+const CHECK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+
+/* ---------- ui state ---------- */
+let TAB = "menu", GTAB = "ekmek";
+try{ TAB = localStorage.getItem("degisim-tab") || "menu"; }catch(e){}
+let confirmKey = null;
+
+function render(){
+  // profiles
+  $("#profiles").innerHTML = ["p1","p2","p3"].map(id=>{
+    const p = S.profiles[id]; const ini = p.name.trim().split(/\s+/).map(w=>w[0]||"").join("").slice(0,2).toLocaleUpperCase("tr");
+    return `<button class="pbtn" data-profile="${id}" aria-pressed="${S.active===id}"><span class="dot">${esc(ini||"?")}</span>${esc(p.name)}</button>`;
+  }).join("");
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===TAB));
+  const main = $("#main");
+  if(TAB==="menu") main.innerHTML = viewMenu();
+  else if(TAB==="tables") main.innerHTML = viewTables();
+  else if(TAB==="rules") main.innerHTML = viewRules();
+  else main.innerHTML = viewEdit();
+}
+
+function viewMenu(){
+  const p = P();
+  if(!p.meals.length){
+    return `<div class="empty"><h2>${esc(p.name)} için liste yok</h2>
+      <p>Diyetisyenin verdiği listeyi öğün öğün ekle. Her kalemi grup ve değişim sayısıyla girersen menüden değiştirebilirsin.</p>
+      <div class="row"><button class="btn primary" data-go="edit">Liste oluştur</button>
+      <button class="btn" data-act="copy-berkay">Berkay Er'in listesini kopyala</button></div></div>`;
+  }
+  const {t, gi} = totals(p);
+  const log = p.log[todayKey()] || {};
+  const d = new Date().toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long"});
+  const who = [p.fullName, p.source].filter(Boolean).map(esc).join(" · ");
+  let h = (who?`<p class="owner">${who}</p>`:"") + `<div class="day"><h2>Günlük değişim</h2><span class="meta">${esc(d)}</span></div>
+    <div class="totals">${GKEYS.map(k=>`<div class="tot" style="--c:${gcolor(k)}"><b class="tnum">${fmtNum(t[k])}</b><span>${GROUPS[k].name}</span></div>`).join("")}</div>`;
+  if(gi>1) h += `<div class="alert">Kan şekerini hızlı yükselten (*) meyveden bugün ${fmtNum(gi)} porsiyon seçili. Listeye göre günde en fazla 1 porsiyon.</div>`;
+  h += `<div class="meals">`;
+  p.meals.forEach(m=>{
+    h += `<section class="meal"><div class="meal-h"><h3>${esc(m.name)}</h3><span class="time tnum">${esc(m.time||"")}</span></div><ul class="items">`;
+    m.items.forEach(it=>{
+      const done = !!log[it.id];
+      const ck = `<button class="check" data-check="${it.id}" aria-pressed="${done}" aria-label="Yedim">${done?CHECK:""}</button>`;
+      if(it.kind==="free"){
+        h += `<li class="item free ${done?"done":""}">${ck}<div class="what"><span class="chip" style="--c:var(--g-serbest)">Serbest</span><span class="food">${esc(it.text)}</span></div><span></span></li>`;
+      } else {
+        const G = GROUPS[it.group];
+        const lines = portions(it).map(x=>{ const f = FOOD[it.group+":"+x.f]; if(!f) return ""; return `<span class="food">${esc(f.name)}${f.gi?'<span class="star">*</span>':""} <span class="amt tnum">${esc(amount(f,x.u))}</span></span>`; }).join("");
+        h += `<li class="item ${done?"done":""}">${ck}<div class="what"><span class="chip" style="--c:${gcolor(it.group)}">${G.name} <span class="n tnum">× ${fmtNum(it.units)} değişim</span>${isSwapped(it)?' <span class="swapped">· değiştirildi</span>':""}</span>${lines}</div>
+          <button class="btn" data-swap="${it.id}">Değiştir</button></li>`;
+      }
+    });
+    h += `</ul></section>`;
+  });
+  h += `</div>`;
+  return h;
+}
+
+function viewTables(){
+  const G = GROUPS[GTAB];
+  return `<div class="explain"><h2>Değişim nasıl çalışır?</h2>
+    <p>Listen yemek adıyla değil, her besin grubundan kaç <b>değişim</b> (porsiyon eşdeğeri) yiyeceğinle yazılmış. Aynı gruptaki besinlerin 1 değişimi aynı değerdedir. Örneğin 1 ince dilim ekmek = 2 yemek kaşığı pilav = 1 küçük haşlanmış patates. Öğündeki 3 ekmek değişimini 6 yk pilav ya da 1 dilim ekmek + 4 yk pilav olarak yiyebilirsin. Değişim sadece aynı grup içinde yapılır; ekmek yerine et yenmez.</p></div>
+    <div class="gtabs" role="tablist">${GKEYS.map(k=>`<button class="gtab" role="tab" style="--c:${gcolor(k)}" data-gtab="${k}" aria-selected="${k===GTAB}">${GROUPS[k].name}</button>`).join("")}</div>
+    <p class="tnote">${esc(G.info)}</p>
+    <div class="tbl-wrap"><table><thead><tr><th>Besin</th><th>1 değişim</th><th>2 değişim</th></tr></thead><tbody>
+    ${G.foods.map(f=>`<tr><td>${esc(f.name)}${f.gi?' <span style="color:var(--g-meyve)">*</span>':""}${f.note?`<div class="hint">${esc(f.note)}</div>`:""}</td><td class="num">${esc(amount(f,1))}</td><td class="num">${esc(amount(f,2))}</td></tr>`).join("")}
+    </tbody></table></div>`;
+}
+
+function viewRules(){
+  return `<div class="cols">
+    <div class="card no"><h2>Yenilmemesi gerekenler</h2><ul>${RULES.avoid.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+    <div class="card"><h2>Öneriler</h2><ul>${RULES.tips.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+  </div>`;
+}
+
+function viewEdit(){
+  const p = P();
+  const gopts = GKEYS.map(k=>`<option value="${k}">${GROUPS[k].name}</option>`).join("") + `<option value="free">Serbest (yazı)</option>`;
+  let h = `<div class="form">
+    <div class="field"><label for="pname">Profil adı</label><input type="text" id="pname" value="${esc(p.name)}"></div>
+    <div class="field"><label for="pfull">Listedeki hasta adı</label><input type="text" id="pfull" value="${esc(p.fullName||"")}"></div>
+    <div class="field"><label for="psrc">Listeyi veren kurum</label><input type="text" id="psrc" value="${esc(p.source||"")}"></div>`;
+  p.meals.forEach((m,mi)=>{
+    h += `<section class="meal"><div class="emeal-h">
+      <input type="text" id="mn-${m.id}" data-mname="${m.id}" value="${esc(m.name)}" aria-label="Öğün adı">
+      <input type="text" id="mt-${m.id}" data-mtime="${m.id}" value="${esc(m.time||"")}" placeholder="Saat" aria-label="Saat">
+      <button class="btn danger ghost" data-delmeal="${m.id}">${confirmKey==="meal:"+m.id?"Emin misin? Sil":"Öğünü sil"}</button></div>`;
+    m.items.forEach(it=>{
+      const txt = it.kind==="free" ? `<span class="chip" style="--c:var(--g-serbest)">Serbest</span> ${esc(it.text)}` :
+        `<span class="chip" style="--c:${gcolor(it.group)}">${GROUPS[it.group].name} <span class="n">× ${fmtNum(it.units)}</span></span> ${esc(FOOD[it.group+":"+it.def[0].f]?.name||"")}${it.orig?` <span class="hint">(${esc(it.orig)})</span>`:""}`;
+      h += `<div class="erow"><div class="what">${txt}</div><button class="btn ghost danger" data-delitem="${m.id}|${it.id}" aria-label="Kalemi sil">Sil</button></div>`;
+    });
+    h += `<div class="add" data-addrow="${m.id}">
+      <select id="ag-${m.id}" data-addgroup="${m.id}" aria-label="Grup">${gopts}</select>
+      <select id="au-${m.id}" aria-label="Değişim sayısı">${[.5,1,1.5,2,3,4,5,6,7,8].map(n=>`<option value="${n}" ${n===1?"selected":""}>× ${fmtNum(n)}</option>`).join("")}</select>
+      <span id="af-wrap-${m.id}">${foodSelect(m.id,"et")}</span>
+      <button class="btn primary" data-additem="${m.id}">Ekle</button></div></section>`;
+  });
+  h += `<div class="row"><button class="btn" data-act="addmeal">+ Öğün ekle</button>
+    ${S.active==="p1"?`<button class="btn danger" data-act="reset">${confirmKey==="reset"?"Emin misin? Orijinale dön":"Diyetisyen listesine sıfırla"}</button>`:`<button class="btn" data-act="copy-berkay">${confirmKey==="copy"?"Emin misin? Üzerine yaz":"Berkay Er'in listesini kopyala"}</button>`}
+    <button class="btn ghost" data-act="clearswaps">Tüm değişimleri geri al</button></div>
+    <div class="card"><h2>Yedek / başka cihaza taşı</h2>
+      <p class="hint">Tüm profilleri metin olarak kopyala, diğer cihazda buraya yapıştırıp “İçe aktar”a bas.</p>
+      <textarea id="io" aria-label="Yedek verisi"></textarea>
+      <div class="row"><button class="btn" data-act="export">Yedeği göster ve kopyala</button><button class="btn" data-act="import">İçe aktar</button></div>
+    </div></div>`;
+  return h;
+}
+function foodSelect(mid, g){
+  if(g==="free") return `<input type="text" id="af-${mid}" placeholder="ör. Salata (az yağlı)" aria-label="Metin">`;
+  return `<select id="af-${mid}" aria-label="Varsayılan besin">${GROUPS[g].foods.map(f=>`<option value="${f.id}">${esc(f.name)}</option>`).join("")}</select>`;
+}
+
+/* ---------- swap sheet ---------- */
+let SW = null; // {mid, iid, counts:{}}
+function findItem(iid){ for(const m of P().meals){ const it=m.items.find(x=>x.id===iid); if(it) return {m,it}; } return null; }
+function openSwap(iid){
+  const r = findItem(iid); if(!r) return;
+  const counts = {}; portions(r.it).forEach(x=>counts[x.f]=(counts[x.f]||0)+x.u);
+  SW = {iid, counts, step: r.it.units % 1 ? .5 : 1};
+  renderSheet();
+}
+function renderSheet(){
+  const root = $("#sheet-root");
+  if(!SW){ root.innerHTML=""; return; }
+  const {it, m} = findItem(SW.iid); const G = GROUPS[it.group];
+  const used = Object.values(SW.counts).reduce((a,b)=>a+b,0);
+  const left = it.units - used;
+  const segs = Math.max(it.units, used) / SW.step;
+  let meter = ""; for(let i=0;i<segs;i++){ const v=(i+1)*SW.step; meter += `<i class="${v<=used+1e-9 ? (v>it.units+1e-9?"over":"on") : ""}"></i>`; }
+  const status = Math.abs(left)<1e-9 ? "Tamam, değişimler dengede." : left>0 ? `${fmtNum(left)} değişim daha seç.` : `${fmtNum(-left)} değişim fazla.`;
+  root.innerHTML = `<div class="scrim" data-close="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="Değiştir" style="--c:${gcolor(it.group)}">
+    <div class="sheet-h"><span class="chip" style="--c:${gcolor(it.group)}">${esc(m.name)} · ${G.name}</span>
+      <h3>${fmtNum(it.units)} ${G.long}</h3>
+      <p>Bir besine dokun: hepsi onunla değişir. Ya da +/− ile birkaç besine böl.${it.orig?` Listede: ${esc(it.orig)}.`:""}</p>
+      <div class="meter" aria-hidden="true">${meter}</div>
+      <p class="tnum" role="status">${status}</p></div>
+    <div class="sheet-b">${G.foods.map(f=>{
+      const c = SW.counts[f.id]||0;
+      return `<div class="opt ${c?"sel":""}"><div><button class="nm" data-all="${f.id}">${esc(f.name)}${f.gi?' <span style="color:var(--g-meyve)">*</span>':""}</button>
+        <div class="sub tnum">1 değişim: ${esc(amount(f,1))}</div>
+        ${c?`<div class="cur tnum">Seçili: ${esc(amount(f,c))}</div>`:""}</div>
+        <div class="step"><button data-dec="${f.id}" aria-label="${esc(f.name)} azalt" ${c?"":"disabled"}>−</button><output class="tnum">${fmtNum(c)}</output><button data-inc="${f.id}" aria-label="${esc(f.name)} artır">+</button></div></div>`;
+    }).join("")}</div>
+    <div class="sheet-f"><button class="btn ghost" data-swapreset="1">Listedeki haline dön</button>
+      <div class="right"><button class="btn" data-close="1">Vazgeç</button><button class="btn primary" data-swapsave="1" ${Math.abs(left)<1e-9?"":"disabled"}>Kaydet</button></div></div>
+  </div></div>`;
+}
+function saveSwap(){
+  const {it} = findItem(SW.iid);
+  const sel = Object.entries(SW.counts).filter(([,u])=>u>0).map(([f,u])=>({f,u}));
+  const same = sel.length===it.def.length && sel.every(x=>it.def.some(d=>d.f===x.f && d.u===x.u));
+  it.sel = same ? null : sel;
+  SW = null; save(); renderSheet(); render(); toast("Değişim kaydedildi");
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", e=>{
+  const b = e.target.closest("button, .scrim"); if(!b) return;
+  const d = b.dataset;
+  if(b.classList.contains("scrim") && e.target!==b) return;
+  if(d.close){ SW=null; renderSheet(); return; }
+  if(d.profile){ S.active=d.profile; confirmKey=null; save(); render(); return; }
+  if(d.tab){ TAB=d.tab; confirmKey=null; try{localStorage.setItem("degisim-tab",TAB)}catch(e){} render(); return; }
+  if(d.go){ TAB=d.go; render(); return; }
+  if(d.gtab){ GTAB=d.gtab; render(); return; }
+  if(d.check){ const k=todayKey(); const p=P(); p.log={[k]:p.log[k]||{}}; p.log[k][d.check]=!p.log[k][d.check]; if(!p.log[k][d.check]) delete p.log[k][d.check]; save(); render(); return; }
+  if(d.swap){ openSwap(d.swap); return; }
+  if(d.all){ const {it}=findItem(SW.iid); SW.counts={[d.all]:it.units}; renderSheet(); return; }
+  if(d.inc){ SW.counts[d.inc]=(SW.counts[d.inc]||0)+SW.step; renderSheet(); return; }
+  if(d.dec){ SW.counts[d.dec]=Math.max(0,(SW.counts[d.dec]||0)-SW.step); renderSheet(); return; }
+  if(d.swapreset){ const {it}=findItem(SW.iid); SW.counts={}; it.def.forEach(x=>SW.counts[x.f]=x.u); renderSheet(); return; }
+  if(d.swapsave){ saveSwap(); return; }
+  if(d.delmeal){ if(confirmKey!=="meal:"+d.delmeal){ confirmKey="meal:"+d.delmeal; render(); return; } P().meals=P().meals.filter(m=>m.id!==d.delmeal); confirmKey=null; save(); render(); return; }
+  if(d.delitem){ const [mid,iid]=d.delitem.split("|"); const m=P().meals.find(x=>x.id===mid); m.items=m.items.filter(x=>x.id!==iid); save(); render(); return; }
+  if(d.additem){
+    const mid=d.additem, g=$("#ag-"+mid).value, u=parseFloat($("#au-"+mid).value), fv=$("#af-"+mid).value.trim();
+    const m=P().meals.find(x=>x.id===mid);
+    if(g==="free"){ if(!fv){ toast("Önce metni yaz"); return; } m.items.push(fr(fv)); }
+    else m.items.push(ex(g,u,fv));
+    save(); render(); toast("Eklendi"); return;
+  }
+  if(d.act==="addmeal"){ P().meals.push({id:nid("m"),name:"Yeni öğün",time:"",items:[]}); save(); render(); return; }
+  if(d.act==="reset"){ if(confirmKey!=="reset"){ confirmKey="reset"; render(); return; } P().meals=berkayPlan(); confirmKey=null; save(); render(); toast("Diyetisyen listesine dönüldü"); return; }
+  if(d.act==="copy-berkay"){
+    if(P().meals.length && confirmKey!=="copy"){ confirmKey="copy"; render(); return; }
+    P().meals = JSON.parse(JSON.stringify(S.profiles.p1.meals)).map(m=>({...m,id:nid("m"),items:m.items.map(it=>({...it,id:nid()}))}));
+    confirmKey=null; save(); render(); toast("Liste kopyalandı"); return;
+  }
+  if(d.act==="clearswaps"){ P().meals.forEach(m=>m.items.forEach(it=>{ if(it.kind==="ex") it.sel=null; })); save(); render(); toast("Tüm değişimler geri alındı"); return; }
+  if(d.act==="export"){ const ta=$("#io"); ta.value=JSON.stringify(S); ta.select();
+    try{ navigator.clipboard.writeText(ta.value).then(()=>toast("Kopyalandı"),()=>toast("Metin seçildi, kopyala")); }catch(err){ toast("Metin seçildi, kopyala"); } return; }
+  if(d.act==="import"){ try{ const o=JSON.parse($("#io").value); if(!o.profiles||!o.profiles.p1) throw 0; S=o; save(); render(); toast("İçe aktarıldı"); }catch(err){ toast("Metin okunamadı. Yedeğin tamamını yapıştır."); } return; }
+});
+document.addEventListener("change", e=>{
+  const t = e.target;
+  if(t.id==="pname"){ P().name = t.value.trim() || "Profil"; save(); render(); }
+  else if(t.id==="pfull"){ P().fullName = t.value.trim(); save(); }
+  else if(t.id==="psrc"){ P().source = t.value.trim(); save(); }
+  else if(t.dataset.mname){ P().meals.find(m=>m.id===t.dataset.mname).name=t.value; save(); }
+  else if(t.dataset.mtime){ P().meals.find(m=>m.id===t.dataset.mtime).time=t.value; save(); }
+  else if(t.dataset.addgroup){ $("#af-wrap-"+t.dataset.addgroup).innerHTML = foodSelect(t.dataset.addgroup, t.value); }
+});
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && SW){ SW=null; renderSheet(); } });
+
+render();
+</script>
+</body>
+</html>
