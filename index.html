@@ -75,6 +75,16 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:
 .mroom{margin:0;padding:8px 14px 0;border-top:1px solid var(--line)}
 .improw{display:grid;gap:4px;padding:10px 14px;border-top:1px solid var(--line)}
 .improw.check{background:var(--warn-soft)}
+.qwarn{margin-top:10px;background:var(--warn-soft);border-radius:10px;padding:10px 12px;display:grid;gap:8px;font-size:13px}
+.qwarn>b{color:var(--warn)}
+.qwarn ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.qwarn p{margin:0;color:var(--muted)}
+.qphoto{display:grid;gap:6px}
+.qnum{font-weight:600}
+.qcrops{display:grid;gap:6px}
+.qmore summary{cursor:pointer;font-weight:600;color:var(--warn)}
+.qmore .qcrops{margin-top:6px}
+.qcrops img{display:block;max-width:100%;height:auto;border-radius:6px;border:1px solid var(--line);background:#fff}
 .impc{display:grid;grid-template-columns:110px 80px 1fr auto;gap:8px;align-items:stretch}
 .impc input[type=text]{grid-column:span 2}
 @media (max-width:560px){.impc{grid-template-columns:1fr 84px auto}.impc select[data-impf],.impc input[type=text]{grid-column:1/-1;order:3}.impc.free select{grid-column:1/3}}
@@ -691,7 +701,7 @@ function viewOnboard(){
     <p class="hint">Bu hesap için bir başlangıç seç. Sonradan “Profil” sekmesinden değiştirebilirsin.</p>
     <div class="choices">
       ${IS_BERKAY?`<button class="choice" data-onboard="berkay"><b>Berkay Er'in diyetisyen listesi</b><span>Aydın Kuşadası İlçe Sağlık Müdürlüğü listesi. Değişim limitleri kilitli.</span></button>`:
-      `<button class="choice" data-imp="start"><b>Diyetisyen listemi fotoğraftan ekle</b><span>Listenin fotoğrafını çek; öğünler ve değişimler otomatik çıkarılır, kaydetmeden önce kontrol edersin.</span></button>`}
+      `<button class="choice" data-imp="start"><b>Diyetisyen listemi fotoğraftan ekle</b><span>Listenin fotoğrafını çek; öğünler ve değişimler otomatik çıkarılır, kaydetmeden önce kontrol edersin. Kağıdı düz koyup tam üstten, parlamadan çek.</span></button>`}
       ${legacy.map(x=>`<button class="choice" data-onboard="legacy:${x.id}"><b>Bu cihazdaki kayıt: ${esc(x.p.name)}</b><span>Hesaplardan önce bu tarayıcıda tutulan liste ve değişimler taşınır.</span></button>`).join("")}
       <div class="choice"><b>Boş liste</b><span>Kendi diyetisyen listeni öğün öğün gir.</span>
         <div class="field"><label for="oname">Profil adı</label><input type="text" id="oname" value="${esc((USER.email||"").split("@")[0])}"></div>
@@ -804,6 +814,7 @@ function viewEdit(){
     <button class="btn ghost" data-act="clearswaps">Tüm değişimleri geri al</button></div>
     <div class="card"><h2>Yeni diyetisyen listesi</h2>
       <p class="hint">Diyetisyen yeni liste verince fotoğrafını ekle: öğünler ve değişim sayıları otomatik çıkarılır, kaydetmeden önce kontrol edip düzeltirsin. Kaydedilen liste yeni limitin olur.</p>
+      <p class="hint">İpucu: kağıdı düz bir yere koy, telefonu tam üstünden tut, ışık kağıtta parlamasın. Eğik, kıvrık ya da parlayan kısımlar okunamaz.</p>
       <div class="row"><button class="btn primary" data-imp="start">Fotoğraftan liste ekle</button><button class="btn" data-imp="text">Metni yapıştır</button></div></div>
     <p class="hint">Liste hesabına kaydedilir; aynı e-postayla girdiğin her cihazda görünür.</p></div>`;
   return h;
@@ -1143,12 +1154,14 @@ function pHeader(line){
 }
 const P_ADVICE = /\b[a-z]*(iniz|yiniz|meyin|mayin|unuz|yunuz)\b/;
 const P_END = /^(tablo\s*\d|yenilmemesi|oneriler|degisim (listesi|tablosu)|meyvelerin \d)/;
-function parseDietText(text){
-  const meals = []; let cur = null, started = false, pendingTime = "", pre = [], prevAlt = false;
+function parseDietText(text, bad, seen){   // bad: fotoğrafta okunamayan ham satırlar (Set), bunlardan gelen kalemler işaretlenir; seen: listenin içinde kalan ham satırlar buraya eklenir
+  const meals = []; let cur = null, started = false, pendingTime = "", pre = [], prevAlt = false, rawBad = false;
+  const tag = its => rawBad ? its.map(it=>Object.assign(it, {check:true, unread:true})) : its;
   const open = () => { cur = {name:"", time:"", timeFirst:false, items:[], spor:false}; meals.push(cur); return cur; };
   const setTime = t => { if(!cur) open(); cur.time = t; cur.timeFirst = !cur.items.length; };
   for(const raw of String(text||"").split(/\r?\n/)){
     let line = raw.trim(); if(!line) continue;
+    rawBad = !!(bad && bad.has(line)); if(seen && started) seen.add(line);
     if(/^=+\s*foto/i.test(line)){ cur = null; started = false; pendingTime = ""; pre = []; continue; }   // çok fotoğrafta her sayfa ayrı okunur
     // ayırıcı çizgi kalıntıları: "EE 2 Porsiyon", "1 Adet Yumurta — —", "_ _ _"
     let closeAfter = false;
@@ -1169,11 +1182,11 @@ function parseDietText(text){
     const hdr = pHeader(line);
     if(hdr) line = hdr.rest;
     if(!started){
-      if(hdr || time){ started = true; }
+      if(hdr || time){ started = true; if(seen) seen.add(raw.trim()); }
       else {
         // başlıktan hemen önce basılmış kalem satırı (sütunlu düzen): en fazla 2 satır tutulur
         const its = (line.match(/\p{L}/gu)||[]).length >= 3 ? pItems(line) : [];
-        pre = its.length && its.every(it=>it.kind==="ex" && !it.check) ? pre.concat(its).slice(-2) : [];
+        pre = its.length && its.every(it=>it.kind==="ex" && !it.check) ? pre.concat(tag(its)).slice(-2) : [];
         continue;
       }
     }
@@ -1202,7 +1215,7 @@ function parseDietText(text){
       const c = cur || open(), prev = c.items[c.items.length-1];
       if(prev && !pQtys(f).length){ const ws = f.match(/[a-z]{3,}/g)||[], pw = fold(prev.orig||prev.text||"");
         if(ws.length && ws.filter(x=>pw.includes(x)).length / ws.length >= .6) continue; }   // bir önceki satırın okuma tekrarı
-      c.items.push(...pItems(line));
+      c.items.push(...tag(pItems(line)));
     }
     if(closeAfter) cur = null;
   }
@@ -1246,34 +1259,83 @@ async function prepImage(file, stretch){
     x.putImageData(d, 0, 0); return c;
   } finally { URL.revokeObjectURL(url); }
 }
+// fotoğraf kalitesi: eğim (satır tabanlarının açısı), ışık (kağıdın bölge bölge parlaklığı), okunamayan satırlar (düşük güven)
+const Q_SKEW = 2.5, Q_LIGHT = 50, Q_CONF = 60;
+function photoQuality(data, gray, canvas, seen){
+  // seen: ayrıştırıcının yemek listesi olarak işlediği ham satırlar; arkadaki sayfalardan okunan yazılar bu yüzden sayılmaz
+  const W = gray.width, H = gray.height, lines = [];
+  (data.blocks||[]).forEach(b=>(b.paragraphs||[]).forEach(p=>(p.lines||[]).forEach(l=>{ if(l && l.bbox && l.bbox.x1 > l.bbox.x0 && l.bbox.y1 > l.bbox.y0) lines.push(l); })));
+  const letters = s => (String(s).match(/\p{L}/gu)||[]).length;
+  const union = (a, l) => ({x0:Math.min(a.x0,l.bbox.x0), y0:Math.min(a.y0,l.bbox.y0), x1:Math.max(a.x1,l.bbox.x1), y1:Math.max(a.y1,l.bbox.y1)});
+  const inList = l => !!(seen && seen.has(String(l.text).trim()));
+  const listed = !!(seen && seen.size);
+  const cand = l => l.confidence < Q_CONF && letters(l.text) >= 5 && /\p{L}{3}/u.test(l.text) && letters(l.text) / Math.max(1, l.text.replace(/\s/g,"").length) >= .5;
+  const goodAll = lines.filter(l=>l.confidence >= Q_CONF && l.bbox.x1-l.bbox.x0 > W*.08 && letters(l.text) >= 3);
+  const goodList = goodAll.filter(inList), good = goodList.length >= 3 ? goodList : goodAll;
+  const none = good.length < 3;
+  // okunamayan satırlar: listenin içinde, harfli ama güveni düşük (liste bulunamadıysa okunan yazının arasındakiler)
+  const G = good.length ? good.reduce(union, {x0:W, y0:H, x1:0, y1:0}) : {x0:0, y0:0, x1:W, y1:H};
+  const nearG = l => { const cy = (l.bbox.y0+l.bbox.y1)/2; return cy >= G.y0 && cy <= G.y1; };
+  const badL = lines.filter(l=>cand(l) && (listed ? inList(l) : nearG(l)));
+  const bad = badL.slice(0, 10).map(l=>{
+    const pad = 8, x0 = Math.max(0, l.bbox.x0-pad), y0 = Math.max(0, l.bbox.y0-pad), w = Math.max(1, Math.min(W, l.bbox.x1+pad)-x0), h = Math.max(1, Math.min(H, l.bbox.y1+pad)-y0);
+    const k = Math.min(1, 700/w), c = document.createElement("canvas"); c.width = Math.max(1, Math.round(w*k)); c.height = Math.max(1, Math.round(h*k));
+    c.getContext("2d").drawImage(canvas, x0, y0, w, h, 0, 0, c.width, c.height);
+    return {src: c.toDataURL("image/jpeg", .75)};
+  });
+  const badAll = badL.map(l=>l.text.trim()).filter(Boolean);
+  if(none) return {none:true, skew:0, light:false, bad, badAll};
+  // eğim: satırların ortanca açısı ya da satırlar arası açı farkı (kıvrık kağıt)
+  const ang = good.filter(l=>l.baseline).map(l=>Math.atan2(l.baseline.y1-l.baseline.y0, l.baseline.x1-l.baseline.x0)*180/Math.PI).sort((a,b)=>a-b);
+  const at = p => ang[Math.min(ang.length-1, Math.floor(ang.length*p))];
+  const tilt = ang.length >= 3 ? Math.abs(at(.5)) : 0, bend = ang.length >= 5 ? at(.9)-at(.1) : 0;
+  // ışık: listenin alanı (okunan + okunamayan satırlar) 6x8 hücreye bölünür; her hücrede kağıdın parlaklığı (90. yüzdelik, yazıyı saymaz)
+  const A = badL.reduce(union, G);
+  const ax = Math.max(0, Math.floor(A.x0)), ay = Math.max(0, Math.floor(A.y0)), aw = Math.max(1, Math.min(W, Math.ceil(A.x1)) - ax), ah = Math.max(1, Math.min(H, Math.ceil(A.y1)) - ay);
+  const px = gray.getContext("2d").getImageData(ax, ay, aw, ah).data, cells = [];
+  for(let cy=0; cy<8; cy++) for(let cx=0; cx<6; cx++){
+    const hist = new Uint32Array(256); let n = 0;
+    for(let y=Math.floor(cy*ah/8); y<Math.floor((cy+1)*ah/8); y+=3) for(let x=Math.floor(cx*aw/6); x<Math.floor((cx+1)*aw/6); x+=3){ hist[px[(y*aw+x)*4]]++; n++; }
+    if(n < 20) continue; let sum = 0, v = 0; for(; v<256; v++){ sum += hist[v]; if(sum >= n*.9) break; } cells.push(v);
+  }
+  cells.sort((a,b)=>a-b);
+  const light = cells.length >= 6 ? cells[cells.length-2] - cells[1] : 0;
+  return {none:false, skew: tilt >= Q_SKEW || bend >= Q_SKEW ? Math.max(1, Math.round(Math.max(tilt, bend))) : 0, light: light >= Q_LIGHT, bad, badAll};
+}
 function impProgress(){ const el = $("#impprog"); if(el && IMP){ el.value = IMP.progress||0; } const m = $("#impmsg"); if(m && IMP) m.textContent = IMP.msg||""; }
 async function runImport(files){
-  IMP = {phase:"ocr", progress:0, msg:"Yazı tanıma yükleniyor…", text:"", meals:[]}; TAB = TAB==="edit" ? "edit" : "menu"; render();
+  // her okuma kendi nesnesine yazar: vazgeçilen ya da yerine yenisi başlatılan okuma sonucu ekrana karışmaz
+  const run = IMP = {phase:"ocr", progress:0, msg:"Yazı tanıma yükleniyor…", text:"", meals:[]}; TAB = TAB==="edit" ? "edit" : "menu"; render();
+  const alive = () => IMP === run;
   let w = null;
   try{
-    await loadTesseract();
+    await loadTesseract(); if(!alive()) return;
     const n = files.length; let i = 0;
     let pass = 0;
-    w = await Tesseract.createWorker("tur", 1, {logger: m=>{ if(!IMP) return; if(m.status==="recognizing text"){ IMP.progress = (i + (pass + m.progress)/2)/n; IMP.msg = `Okunuyor${n>1?` (${i+1}/${n})`:""}…`; } else if(/load/.test(m.status||"")) IMP.msg = "Türkçe dil dosyası yükleniyor…"; impProgress(); }});
-    let text = "";
+    w = await Tesseract.createWorker("tur", 1, {logger: m=>{ if(!alive()) return; if(m.status==="recognizing text"){ run.progress = (i + (pass + m.progress)/2)/n; run.msg = `Okunuyor${n>1?` (${i+1}/${n})`:""}…`; } else if(/load/.test(m.status||"")) run.msg = "Türkçe dil dosyası yükleniyor…"; impProgress(); }});
+    run.worker = w; if(!alive()) return;
+    let text = ""; const quality = [];
     for(; i<n; i++){
       // aynı fotoğraf iki ayarla okunur, algoritmanın daha tutarlı bulduğu metin seçilir
-      let best = null;
-      for(pass=0; pass<2; pass++){ const c = await prepImage(files[i], pass===1); const {data} = await w.recognize(c);
-        const sc = parseScore(parseDietText(data.text)); if(!best || sc > best.sc) best = {sc, t:data.text}; }
+      let best = null, gray = null;
+      for(pass=0; pass<2; pass++){ const c = await prepImage(files[i], pass===1); if(!alive()) return; if(!pass) gray = c;
+        const {data} = await w.recognize(c, {}, {text:true, blocks:true}); if(!alive()) return;
+        const sc = parseScore(parseDietText(data.text)); if(!best || sc > best.sc) best = {sc, t:data.text, data, c}; }
       text += (n > 1 ? `=== FOTOĞRAF ${i+1} ===\n` : "") + best.t + "\n";
+      try{ const seen = new Set(); parseDietText(best.t, null, seen); const q = photoQuality(best.data, gray, best.c, seen); if(q.none || q.skew || q.light || q.badAll.length) quality.push({...q, photo:i+1}); }catch(e){}
     }
-    if(!IMP) return;
-    IMP.text = text; IMP.meals = parseDietText(text); IMP.phase = "review";
-  }catch(e){ if(IMP){ IMP.phase = "text"; IMP.err = "Fotoğraf okunamadı. İnternet bağlantını kontrol et ya da listenin metnini aşağıya yapıştır."; } }
-  finally{ if(w) w.terminate().catch(()=>{}); }
-  render();
+    if(!alive()) return;
+    run.text = text; run.quality = quality; run.photos = n; run.meals = parseDietText(text, impBad(run)); run.phase = "review";
+  }catch(e){ if(alive()){ run.phase = "text"; run.err = "Fotoğraf okunamadı. İnternet bağlantını kontrol et ya da listenin metnini aşağıya yapıştır."; } }
+  finally{ if(w) w.terminate().catch(()=>{}); delete run.worker; }
+  if(alive()) render();
 }
+const impBad = imp => new Set(((imp && imp.quality)||[]).flatMap(q=>q.badAll||[]));
 const IMP_UNITS = [.5,1,1.5,2,2.5,3,3.5,4,5,6,7,8,9,10,12];
 function viewImport(){
   if(IMP.phase==="ocr") return `<div class="card auth"><h2>Liste okunuyor</h2><p class="hint" id="impmsg">${esc(IMP.msg||"")}</p>
     <progress id="impprog" max="1" value="${IMP.progress||0}" style="width:100%"></progress>
-    <p class="hint">İlk seferde Türkçe dil dosyası indirildiği için biraz sürebilir.</p><div class="row"><button class="btn" data-imp="cancel">Vazgeç</button></div></div>`;
+    <p class="hint">İlk seferde Türkçe dil dosyası indirildiği için biraz sürebilir.</p><p class="hint">İpucu: kağıdı düz bir yere koy, telefonu tam üstünden tut, ışık kağıtta parlamasın. Eğik, kıvrık ya da parlayan kısımlar okunamaz.</p><div class="row"><button class="btn" data-imp="cancel">Vazgeç</button></div></div>`;
   const textBox = `<div class="field"><label for="imptext">Listenin metni</label><textarea id="imptext" rows="10" placeholder="SABAH 10.30-11.00&#10;2 dilim peynir&#10;1 adet yumurta&#10;...">${esc(IMP.text||"")}</textarea></div>
     <div class="row"><button class="btn" data-imp="parse">Metinden oku</button><button class="btn ghost" data-imp="start">Fotoğraf seç</button></div>`;
   if(IMP.phase==="text") return `<div class="card"><h2>Diyetisyen listesi</h2>${IMP.err?`<p class="alert">${esc(IMP.err)}</p>`:""}
@@ -1281,10 +1343,22 @@ function viewImport(){
     ${textBox}<div class="row"><button class="btn ghost" data-imp="cancel">Vazgeç</button></div></div>`;
   const gopts = sel => GKEYS.map(k=>`<option value="${k}" ${k===sel?"selected":""}>${GROUPS[k].name}</option>`).join("") + `<option value="free" ${sel==="free"?"selected":""}>Serbest</option>`;
   const uopts = u => [...new Set([...IMP_UNITS, u])].sort((a,b)=>a-b).map(n=>`<option value="${n}" ${n===u?"selected":""}>× ${fmtNum(n)}</option>`).join("");
-  const checks = IMP.meals.reduce((a,m)=>a+m.items.filter(it=>it.check).length,0);
+  const checks = IMP.meals.reduce((a,m)=>a+m.items.filter(it=>it.check && !it.unread).length,0);
+  const unread = IMP.meals.reduce((a,m)=>a+m.items.filter(it=>it.unread).length,0);
+  const qs = IMP.quality||[], qimg = b=>`<img src="${b.src}" alt="Okunamayan satır: fotoğraftaki hali" loading="lazy">`;
+  const qwarn = qs.length ? `<div class="qwarn"><b>Fotoğraf${IMP.photos>1?"lar":""} tam okunamadı</b>${qs.map(q=>`<div class="qphoto">${IMP.photos>1?`<span class="qnum">Fotoğraf ${q.photo}</span>`:""}<ul>
+      ${q.none?`<li>Fotoğraftaki yazının çoğu okunamadı.</li>`:""}
+      ${q.skew?`<li>Fotoğraf eğik ya da kağıt kıvrık (yaklaşık ${q.skew}°). Satırlar kayınca yazılar birbirine karışıyor.</li>`:""}
+      ${q.light?`<li>Kağıtta ışık eşit değil: bazı yerler parlıyor, bazı yerler gölgede. Parlayan ya da gölgede kalan kısımlar okunamıyor.</li>`:""}
+      ${q.badAll.length?`<li>${q.badAll.length} satır okunamadı.${q.bad.length?` Fotoğraftaki hali${q.badAll.length>q.bad.length?` (ilk ${q.bad.length} tanesi)`:""}:`:""}</li>`:""}</ul>
+      ${q.bad.length?`<div class="qcrops">${q.bad.slice(0,3).map(qimg).join("")}</div>${q.bad.length>3?`<details class="qmore" data-qphoto="${q.photo}" ${IMP.qopen&&IMP.qopen[q.photo]?"open":""}><summary>Diğer ${q.bad.length-3} satırı gör</summary><div class="qcrops">${q.bad.slice(3).map(qimg).join("")}</div></details>`:""}`:""}</div>`).join("")}
+    <p>Daha iyi sonuç için kağıdı düz bir yere koy, telefonu tam üstünden tut ve ışık kağıtta parlamasın; sonra yeniden çek. Ya da aşağıdaki sarı kalemleri fotoğrafa bakarak düzelt.</p>
+    <div class="row"><button class="btn" data-imp="start">Yeniden fotoğraf çek</button></div></div>` : "";
   const giImp = IMP.meals.reduce((a,m)=>a+m.items.reduce((b,it)=>b+(it.kind==="ex" && FOOD[it.group+":"+it.food]?.gi ? it.units : 0),0),0);
   let h = `<div class="form"><div class="card"><h2>Okunan liste</h2>
     <p class="hint">Fotoğraftan çıkarılan öğünler ve değişim sayıları. Yanlış okunanı düzelt, sonra kaydet. Kaydedilen liste limitin olur; değişimler bu sayılarla yapılır.</p>
+    ${qwarn}
+    ${unread?`<p class="alert" id="impunread">${unread} kalem okunamayan satırdan geldi, sarı işaretli. Fotoğrafa bakıp düzelt.</p>`:""}
     ${checks?`<p class="alert">${checks} kalem tabloyla tam eşleşmedi, sarı işaretli. Kontrol et.</p>`:""}
     ${giImp > GI_MAX + 1e-9 ? `<p class="alert">Listede * işaretli meyve toplam ${fmtNum(giImp)} porsiyon; kurala göre günde en fazla ${GI_MAX}. Birini başka meyveyle değiştir.</p>`:""}
     ${IMP.meals.length?"":`<p class="alert">Listede öğün bulunamadı. Metni kontrol edip “Metinden oku”ya bas.</p>`}</div>`;
@@ -1298,7 +1372,7 @@ function viewImport(){
           : `<select id="iu-${k}" data-impu="${k}" aria-label="Değişim">${uopts(it.units)}</select>
              <select id="if-${k}" data-impf="${k}" aria-label="Besin">${GROUPS[it.group].foods.map(f=>`<option value="${f.id}" ${f.id===it.food?"selected":""}>${esc(f.name)}</option>`).join("")}</select>`}
         <button class="btn ghost danger" data-impdel="${k}" aria-label="Kalemi çıkar">Çıkar</button></div>
-        <div class="hint">Listede: ${esc(it.orig)}${it.kind==="ex"?` → ${esc(amount(FOOD[it.group+":"+it.food], it.units))}`:""}</div></div>`;
+        <div class="hint">${it.unread?"Okunamadı, fotoğrafa bakıp düzelt. Okunan: ":"Listede: "}${esc(it.orig||it.text||"")}${it.kind==="ex"?` → ${esc(amount(FOOD[it.group+":"+it.food], it.units))}`:""}</div></div>`;
     });
     h += `</section>`;
   });
@@ -1328,8 +1402,8 @@ document.addEventListener("click", e=>{
   if(d.imp){
     if(d.imp==="start"){ const fi=$("#impfile"); fi.value=""; fi.click(); return; }
     if(d.imp==="text"){ IMP = {phase:"text", text:"", meals:[]}; render(); return; }
-    if(d.imp==="cancel"){ IMP = null; confirmKey = null; render(); return; }
-    if(d.imp==="parse"){ const t = ($("#imptext")||{}).value||""; IMP = {phase:"review", text:t, meals:parseDietText(t)}; confirmKey=null; render(); return; }
+    if(d.imp==="cancel"){ if(IMP && IMP.worker) IMP.worker.terminate().catch(()=>{}); IMP = null; confirmKey = null; render(); return; }
+    if(d.imp==="parse"){ const t = ($("#imptext")||{}).value||""; const q = IMP&&IMP.quality; IMP = {phase:"review", text:t, meals:parseDietText(t, impBad(IMP)), quality:q, photos:IMP&&IMP.photos, qopen:IMP&&IMP.qopen}; confirmKey=null; render(); return; }
     if(d.imp==="save"){
       if(ME && ME.meals.length && confirmKey!=="imp"){ confirmKey="imp"; render(); return; }
       if(ME){ saveImport(); return; }
@@ -1432,6 +1506,17 @@ document.addEventListener("click", e=>{
     save(); render(); toast(skipped ? `Değişimler geri alındı; * meyve sınırı yüzünden ${skipped} kalem değişik kaldı.` : "Tüm değişimler geri alındı"); return;
   }
 });
+document.addEventListener("input", e=>{
+  const t = e.target; if(!IMP || !IMP.meals || !t.dataset || !t.dataset.imptx) return;
+  const [mi,ii] = t.dataset.imptx.split("-").map(Number), it = IMP.meals[mi] && IMP.meals[mi].items[ii]; if(!it) return;
+  it.text = t.value; if(!it.unread) return;
+  it.check = it.unread = false;
+  const row = t.closest(".improw"); if(row){ row.classList.remove("check"); const hn = row.querySelector(".hint"); if(hn) hn.textContent = "Listede: " + (it.orig||it.text||""); }
+  const n = IMP.meals.reduce((a,m)=>a+m.items.filter(x=>x.unread).length,0), al = $("#impunread");
+  if(al){ if(n) al.textContent = `${n} kalem okunamayan satırdan geldi, sarı işaretli. Fotoğrafa bakıp düzelt.`; else al.remove(); }
+});
+// "Diğer satırları gör" açık kalsın: düzenlemeler ekranı yeniden çizer
+document.addEventListener("toggle", e=>{ const d = e.target; if(IMP && d.classList && d.classList.contains("qmore")) (IMP.qopen = IMP.qopen||{})[d.dataset.qphoto] = d.open; }, true);
 document.addEventListener("change", e=>{
   const t = e.target;
   if(t.id==="impfile"){ const files=[...t.files]; if(files.length) runImport(files); return; }
@@ -1440,9 +1525,9 @@ document.addEventListener("change", e=>{
     if(t.dataset.impmeal){ IMP.meals[+t.dataset.impmeal].name = t.value; return; }
     if(t.dataset.imptime){ IMP.meals[+t.dataset.imptime].time = t.value; return; }
     if(k){ const [mi,ii]=k.split("-").map(Number); const it = IMP.meals[mi].items[ii];
-      if(t.dataset.impg){ if(t.value==="free"){ Object.assign(it,{kind:"free", text:it.orig||""}); } else { Object.assign(it,{kind:"ex", group:t.value, food:GROUPS[t.value].foods[0].id, units:it.units||1}); } it.check=false; render(); }
-      else if(t.dataset.impu){ it.units = parseFloat(t.value); it.check=false; render(); }
-      else if(t.dataset.impf){ it.food = t.value; it.check=false; render(); }
+      if(t.dataset.impg){ if(t.value==="free"){ Object.assign(it,{kind:"free", text:it.orig||""}); } else { Object.assign(it,{kind:"ex", group:t.value, food:GROUPS[t.value].foods[0].id, units:it.units||1}); } it.check=it.unread=false; render(); }
+      else if(t.dataset.impu){ it.units = parseFloat(t.value); it.check=it.unread=false; render(); }
+      else if(t.dataset.impf){ it.food = t.value; it.check=it.unread=false; render(); }
       else if(t.dataset.imptx){ it.text = t.value; }
       return; }
   }
