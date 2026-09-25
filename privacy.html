@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gizlilik Politikası — Diyet Listem</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0 auto; padding: 32px 20px 64px; max-width: 46rem;
+         font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  h1 { font-size: 1.7rem; margin-bottom: .2em; }
+  h2 { font-size: 1.15rem; margin-top: 2em; }
+  .meta { opacity: .7; font-size: .9rem; margin-top: 0; }
+  ul { padding-left: 1.2em; }
+  li { margin: .35em 0; }
+  a { color: inherit; }
+  footer { margin-top: 3em; font-size: .9rem; opacity: .7; }
+</style>
+</head>
+<body>
+
+<h1>Gizlilik Politikası</h1>
+<p class="meta">Diyet Listem (iOS uygulaması) ve Değişim Menüsü (erberkay.github.io/DiyetDegisim)<br>
+Son güncelleme: 25 Eylül 2026</p>
+
+<p>Bu politika, Berkay Er tarafından geliştirilen <strong>Diyet Listem</strong> iOS uygulaması ve aynı hesapları kullanan
+web sürümü için geçerlidir. Amacımız mümkün olan en az veriyi toplamak: uygulama reklam göstermez, sizi izlemez,
+verilerinizi satmaz ve üçüncü taraf reklam veya analiz araçları kullanmaz.</p>
+
+<h2>Topladığımız veriler</h2>
+<ul>
+  <li><strong>Hesap bilgileri.</strong> E-posta adresiniz ve bir hesap kimliği (user ID). Şifreyle kayıt olursanız
+      şifreniz doğrudan Firebase Authentication tarafından saklanır; biz şifrenizi göremeyiz.</li>
+  <li><strong>Apple ile giriş.</strong> Apple ile giriş yapmayı seçerseniz Apple bize adınızı ve e-posta adresinizi
+      iletir. "E-postamı gizle" seçeneğini kullanırsanız yalnızca Apple'ın ürettiği yönlendirme adresini görürüz;
+      gerçek e-posta adresinizi öğrenmeyiz.</li>
+  <li><strong>Liste ve profil bilgileri.</strong> Oluşturduğunuz ya da fotoğraftan aktardığınız diyet listesi
+      (öğünler, besinler, porsiyonlar), listeye verdiğiniz ad, isterseniz yazdığınız ad-soyad ve listenin kaynağı
+      (örneğin diyetisyeninizin adı) ile o güne ait işaretlemeleriniz. Bunlar beslenmenizle ilgili sağlık verisi
+      sayılabileceğinden özenle işlenir.</li>
+</ul>
+
+<h2>Fotoğraflar ve kamera</h2>
+<p>Diyetisyen listenizi fotoğraftan aktarabilirsiniz. Fotoğraf okuma işlemi (açık kaynaklı Tesseract yazı tanıma)
+<strong>tamamen cihazınızın içinde</strong> çalışır. Fotoğraflarınız sunucularımıza veya başka bir servise
+yüklenmez; okuma bittiğinde uygulamanın oluşturduğu geçici kopya hemen silinir. Kamerayı yalnızca siz fotoğraf
+çekmeyi seçtiğinizde ve izin verdiğinizde kullanırız. Fotoğraftan çıkan <em>metin</em>, siz onaylayıp kaydederseniz
+listenizin parçası olarak hesabınıza kaydedilir.</p>
+
+<h2>Verileri ne için kullanıyoruz</h2>
+<ul>
+  <li>Hesabınızı oluşturmak ve oturumunuzu açık tutmak.</li>
+  <li>Listenizi kaydetmek ve aynı hesapla girdiğiniz tüm cihazlarda (iPhone ve web) aynı listeyi göstermek.</li>
+  <li>Porsiyon eşdeğeri hesaplarını ve öğün hatırlatmalarını çalıştırmak.</li>
+</ul>
+<p>Verileriniz reklam, profilleme, pazarlama ya da izleme amacıyla kullanılmaz; başka şirketlerin verileriyle
+eşleştirilmez.</p>
+
+<h2>Nerede saklanıyor</h2>
+<ul>
+  <li><strong>Google Firebase.</strong> Kimlik doğrulama için Firebase Authentication, listeniz için Cloud Firestore
+      kullanılır. Firestore erişim kuralları, her hesabın yalnızca kendi kaydını okuyup yazabileceği şekilde
+      ayarlanmıştır. Google bu hizmetleri sağlarken veri işleyici olarak hareket eder; ayrıntılar için
+      <a href="https://firebase.google.com/support/privacy">Firebase gizlilik bilgileri</a>.</li>
+  <li><strong>Cihazınız.</strong> Çevrimdışıyken de çalışabilmesi için listenizin bir kopyası telefonunuzda saklanır.
+      Hesaptan çıktığınızda bu kopya silinir.</li>
+</ul>
+
+<h2>Paylaşım</h2>
+<p>Listenizi varsayılan olarak yalnızca siz görürsünüz. Uygulamadaki paylaşım özelliğiyle bir kod oluşturup
+listenizi birine gösterirseniz, o kişi yalnızca paylaştığınız listeyi görebilir. Bunun dışında verileriniz
+kimseyle paylaşılmaz, satılmaz veya kiralanmaz. Yasal bir zorunluluk doğması hâlinde yürürlükteki mevzuata uyulur.</p>
+
+<h2>Bildirimler</h2>
+<p>Öğün hatırlatmaları yalnızca cihazınızda oluşturulan yerel bildirimlerdir. Uzaktan (sunucudan) bildirim
+gönderilmez ve bu amaçla bir cihaz kimliği toplanmaz.</p>
+
+<h2>Saklama süresi ve hesabınızı silme</h2>
+<p>Verileriniz hesabınız var olduğu sürece saklanır. Uygulama içindeki <em>Profil</em> bölümünden hesabınızı
+silebilirsiniz; hesap silindiğinde kimlik kaydınız ve listeniz kalıcı olarak kaldırılır. Dilerseniz
+aşağıdaki e-posta adresinden de silme talebinde bulunabilirsiniz.</p>
+
+<h2>Haklarınız</h2>
+<p>KVKK ve GDPR kapsamında verilerinize erişme, düzeltme, silme ve işlemeye itiraz etme haklarına sahipsiniz.
+Talepleriniz için bize yazabilirsiniz.</p>
+
+<h2>Çocuklar</h2>
+<p>Uygulama çocuklara yönelik değildir ve çocuklardan bilerek veri toplamaz.</p>
+
+<h2>Sağlıkla ilgili uyarı</h2>
+<p>Diyet Listem bir tıbbi cihaz değildir; teşhis, tedavi ya da beslenme tavsiyesi vermez. Yalnızca diyetisyeninizin
+verdiği listeyi göstermenize ve porsiyon eşdeğerlerini görmenize yardımcı olan bir araçtır.</p>
+
+<h2>Değişiklikler</h2>
+<p>Bu politika güncellenirse bu sayfadaki tarih değişir. Önemli değişikliklerde uygulama içinde bilgilendirme
+yapılır.</p>
+
+<h2>İletişim</h2>
+<p>Sorularınız ve talepleriniz için: <a href="mailto:bekobekoerer@hotmail.com">bekobekoerer@hotmail.com</a></p>
+
+<footer><a href="./">← Değişim Menüsü'ne dön</a></footer>
+
+</body>
+</html>
